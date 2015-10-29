@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+    <application>oakutils</application>
+    <version>${appengine.app.version}</version>
+    <threadsafe>true</threadsafe>
+
+    <static-files>
+        <exclude path="/WEB-INF/**.groovy" />
+        <exclude path="**.gsp" />
+    </static-files>
+
+    <system-properties>
+        <property name="groovy.source.encoding" value="UTF-8"/>
+        <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+    </system-properties>
+</appengine-web-app>
