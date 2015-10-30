@@ -66,13 +66,13 @@
         def result = rp.format(text)
     %>
       <p class="center">
-      <textarea disabled class="prettyRevText">${result.formattedText}</textarea>
+      <textarea readonly="readonly" class="prettyRevText">${result.formattedText}</textarea>
       </p>
 
     <h3>Sorted Revisions</h3>
     <p class="desc">Below is the sorted list of all revisions extracted from provided input</p>
     <p class="center">
-      <textarea disabled class="prettyRevText">${result.extractedRevisions.join('\n')}</textarea>
+      <textarea readonly="readonly" class="prettyRevText">${result.extractedRevisions.join('\n')}</textarea>
     </p>
 
   </article>
