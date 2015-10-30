@@ -29,13 +29,13 @@
 %>
 <html>
 <head>
-  <title>Oak Utilities : Revision Prettifier</title>
+  <title>Oak Utilities : Revision Formatter</title>
   <link type="text/css" rel="stylesheet" href="github-markdown.css"/>
   <link type="text/css" rel="stylesheet" href="stylish.css"/>
 </head>
 <body>
   <article class="markdown-body">
-    <h1>Revision Prettifier</h1>
+    <h1>Revision Formatter</h1>
     <p class="center">Extracts the revision string from any text and converts them to
       formatted date.</p>
 
