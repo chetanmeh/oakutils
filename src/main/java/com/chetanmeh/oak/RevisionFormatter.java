@@ -97,6 +97,22 @@ public class RevisionFormatter {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FormattedRev that = (FormattedRev) o;
+
+            return !(r != null ? !r.equals(that.r) : that.r != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            return r != null ? r.hashCode() : 0;
+        }
+
+        @Override
         public String toString() {
             return r + ":" + formatRev(r);
         }
