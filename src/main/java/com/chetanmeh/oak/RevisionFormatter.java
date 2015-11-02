@@ -14,9 +14,12 @@
 package com.chetanmeh.oak;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,13 +46,14 @@ public class RevisionFormatter {
     public Result format(String text){
         StringBuffer result = new StringBuffer();
         Matcher m = REV_REG_EX.matcher(text);
-        List<FormattedRev> revs = Lists.newArrayList();
+        Set<FormattedRev> revsSet = new HashSet<>();
         while (m.find()) {
             FormattedRev rev = new FormattedRev(m.group(0));
             m.appendReplacement(result, rev.toString());
-            revs.add(rev);
+            revsSet.add(rev);
         }
 
+        List<FormattedRev> revs = new ArrayList<>(revsSet);
         Collections.sort(revs, Collections.reverseOrder());
         List<String> formattedRevStrs = Lists.newArrayListWithCapacity(revs.size());
         for (FormattedRev r : revs) {
