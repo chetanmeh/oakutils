@@ -46,19 +46,19 @@ public class RevisionFormatter {
     public Result format(String text){
         StringBuffer result = new StringBuffer();
         Matcher m = REV_REG_EX.matcher(text);
-        Set<FormattedRev> revsSet = new HashSet<>();
+        Set<Revision> revsSet = new HashSet<>();
         while (m.find()) {
-            FormattedRev rev = new FormattedRev(m.group(0));
-            m.appendReplacement(result, rev.toString());
+            Revision rev = Revision.fromString(m.group(0));
+            m.appendReplacement(result, formatRev(rev));
             revsSet.add(rev);
         }
         m.appendTail(result);
 
-        List<FormattedRev> revs = new ArrayList<>(revsSet);
-        Collections.sort(revs, Collections.reverseOrder());
+        List<Revision> revs = new ArrayList<>(revsSet);
+        Collections.sort(revs, Collections.reverseOrder(StableRevisionComparator.INSTANCE));
         List<String> formattedRevStrs = Lists.newArrayListWithCapacity(revs.size());
-        for (FormattedRev r : revs) {
-            formattedRevStrs.add(r.toString());
+        for (Revision r : revs) {
+            formattedRevStrs.add(formatRev(r));
         }
 
         return new Result(result.toString(), formattedRevStrs);
@@ -66,11 +66,13 @@ public class RevisionFormatter {
 
     private String formatRev(Revision r) {
         Date d = new Date(r.getTimestamp());
+        String revStr;
         synchronized (sdf) {
-            return sdf.format(d);
+            revStr = sdf.format(d);
         }
+        return r + ":" + revStr;
     }
-    
+
     public static class Result {
         final String formattedText;
         final List<String> extractedRevisions;
@@ -78,44 +80,6 @@ public class RevisionFormatter {
         public Result(String formattedText, List<String> extractedRevisions) {
             this.formattedText = formattedText;
             this.extractedRevisions = extractedRevisions;
-        }
-    }
-
-    private class FormattedRev implements Comparable<FormattedRev> {
-        private final Revision r;
-
-        public FormattedRev(String r) {
-            this(Revision.fromString(r));
-        }
-
-        public FormattedRev(Revision r) {
-            this.r = r;
-        }
-
-        @Override
-        public int compareTo(FormattedRev o) {
-            return StableRevisionComparator.INSTANCE.compare(r, o.r);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            FormattedRev that = (FormattedRev) o;
-
-            return !(r != null ? !r.equals(that.r) : that.r != null);
-
-        }
-
-        @Override
-        public int hashCode() {
-            return r != null ? r.hashCode() : 0;
-        }
-
-        @Override
-        public String toString() {
-            return r + ":" + formatRev(r);
         }
     }
 
