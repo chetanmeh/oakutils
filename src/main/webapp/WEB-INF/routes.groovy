@@ -1,0 +1,1 @@
+all "/formatter", forward: "/revisionFormatter.gsp"
