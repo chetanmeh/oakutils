@@ -46,7 +46,7 @@
       <p>
         TimeZone :
         <select name="timezone">
-          <% TimeZone.availableIDs.each { tz ->
+          <% TimeZone.availableIDs.sort().each { tz ->
             def selected = tz == timezone ? 'selected' : ''
           %>
           <option value="${tz}" ${selected}>${tz}</option>
