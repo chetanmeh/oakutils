@@ -52,6 +52,7 @@ public class RevisionFormatter {
             m.appendReplacement(result, rev.toString());
             revsSet.add(rev);
         }
+        m.appendTail(result);
 
         List<FormattedRev> revs = new ArrayList<>(revsSet);
         Collections.sort(revs, Collections.reverseOrder());
