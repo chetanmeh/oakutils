@@ -104,7 +104,7 @@
         <h3>Lucene Index Details</h3>
         <table class="table table-bordered table-sm table-hover">
         <% int i = 0;
-            int colCount = 6
+            int colCount = 12
             indexes.luceneIndexes.each {li ->
             i++
         %>
@@ -130,6 +130,12 @@
                     <th>Index</th>
                     <th>Ordered</th>
                     <th>Analyzed</th>
+                    <th>Null Check</th>
+                    <th>Excerpt</th>
+                    <th>Node Scope Index</th>
+                    <th>Suggest</th>
+                    <th>Spell Check</th>
+                    <th>Facets</th>
                 </tr>
                 <% int pdCount = 0;rule.properties.each {pd -> pdCount++%>
                 <tr>
@@ -139,6 +145,12 @@
                     <td>${pd.index ? "&checkmark;" : "&#10007;"}</td>
                     <td>${pd.ordered ? "&checkmark;" : ""}</td>
                     <td>${pd.analyzed ? "&checkmark;" : ""}</td>
+                    <td>${pd.nullCheckEnabled ? "&checkmark;" : ""}</td>
+                    <td>${pd.useInExcerpt ? "&checkmark;" : ""}</td>
+                    <td>${pd.nodeScopeIndex ? "&checkmark;" : ""}</td>
+                    <td>${pd.useInSuggest ? "&checkmark;" : ""}</td>
+                    <td>${pd.useInSpellcheck ? "&checkmark;" : ""}</td>
+                    <td>${pd.facets ? "&checkmark;" : ""}</td>
                 </tr>
             <% } %>
             <% } %>

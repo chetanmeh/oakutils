@@ -11,4 +11,10 @@ class PropertyDefinition {
     boolean analyzed
 
     boolean nullCheckEnabled
+    boolean useInExcerpt
+    boolean nodeScopeIndex
+    boolean useInSuggest
+    boolean useInSpellcheck
+
+    boolean facets
 }

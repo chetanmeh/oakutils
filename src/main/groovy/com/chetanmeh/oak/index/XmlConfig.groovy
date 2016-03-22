@@ -55,6 +55,11 @@ class XmlConfig {
                 pd.isRegexp = toBool(p, 'isRegexp', false)
                 pd.nullCheckEnabled = toBool(p, 'nullCheckEnabled', false)
                 pd.index = toBool(p, 'index', true)
+                pd.useInExcerpt = toBool(p, 'useInExcerpt', false)
+                pd.nodeScopeIndex = toBool(p, 'nodeScopeIndex', false)
+                pd.useInSuggest = toBool(p, 'useInSuggest', false)
+                pd.useInSpellcheck = toBool(p, 'useInSpellcheck', false)
+                pd.facets = toBool(p, 'facets', false)
 
                 ir.properties << pd
             }
