@@ -41,6 +41,19 @@
         <a href="/">Back</a>
     </div>
 
+    <div class="row">
+        <h3>Analysis Report</h3>
+        <ul>
+        <% if (indexes.duplicateRules) {%>
+            <li>Multiple rules for same type</li>
+            <ul>
+                <% indexes.duplicateRules.each {k,v ->%>
+                <li>$k - $v</li>
+                <%}%>
+            </ul>
+        <%}%>
+        </ul>
+    </div>
 
     <% if (indexes.propertyIndexes) {%>
         <div class="row">

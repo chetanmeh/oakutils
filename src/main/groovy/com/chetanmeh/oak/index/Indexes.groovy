@@ -6,6 +6,7 @@ class Indexes {
     List<LuceneIndex> luceneIndexes = []
     List<String> disabledIndexes = []
     PropertyIndex nodeTypeIndex
+    Map<String, List<String>> duplicateRules = [:]
 
     int noOfIndexes(){
         return propertyIndexes.size() + luceneIndexes.size()
@@ -20,6 +21,22 @@ class Indexes {
         }
         extractNodeTypeIndex()
         moveGlobalFullTextToLast()
+        identifyDuplicateRules()
+    }
+
+    private void identifyDuplicateRules() {
+        Map<String, List<String>> ruleTypeToIndexMapping = [:].withDefault {[]}
+        luceneIndexes.each {li ->
+            li.rules.each {r ->
+                ruleTypeToIndexMapping[r.type] << li.path
+            }
+        }
+
+        ruleTypeToIndexMapping.each {k, v ->
+            if(v.size() > 1 && k != 'nt:base'){
+                duplicateRules[k] = v
+            }
+        }
     }
 
     private void moveGlobalFullTextToLast() {
