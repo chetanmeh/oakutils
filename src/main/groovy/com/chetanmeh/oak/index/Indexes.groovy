@@ -1,5 +1,7 @@
 package com.chetanmeh.oak.index
 
+import org.apache.jackrabbit.oak.commons.PathUtils
+
 
 class Indexes {
     List<PropertyIndex> propertyIndexes = []
@@ -7,6 +9,7 @@ class Indexes {
     List<String> disabledIndexes = []
     PropertyIndex nodeTypeIndex
     Map<String, List<String>> duplicateRules = [:]
+    Map<String, List<String>> duplicateProperties = [:]
 
     int noOfIndexes(){
         return propertyIndexes.size() + luceneIndexes.size()
@@ -22,6 +25,41 @@ class Indexes {
         extractNodeTypeIndex()
         moveGlobalFullTextToLast()
         identifyDuplicateRules()
+        identifyDuplicateProperties()
+    }
+
+    boolean reportNotEmpty(){
+        duplicateRules || duplicateProperties
+    }
+
+    private void identifyDuplicateProperties() {
+        Map<String, List<String>> propertyToIndexMapping = [:].withDefault {[]}
+        luceneIndexes.each {li ->
+            li.rules.each {r ->
+                r.properties.each {p ->
+                    if(!p.isRegexp  && p.index){
+                        String propName = PathUtils.getName(p.name)
+                        propertyToIndexMapping[propName] << li.path
+                    }
+                }
+            }
+        }
+
+        propertyIndexes.each {p ->
+            if (p.unique) {
+                return
+            }
+            p.@propertyNames.each {name ->
+                String propName = PathUtils.getName(name)
+                propertyToIndexMapping[propName] << p.path
+            }
+        }
+
+        propertyToIndexMapping.each {k, v ->
+            if(v.size() > 1){
+                duplicateProperties.put(k,v)
+            }
+        }
     }
 
     private void identifyDuplicateRules() {

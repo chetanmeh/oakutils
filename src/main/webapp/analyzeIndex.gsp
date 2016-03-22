@@ -25,6 +25,7 @@
 
     <div class="row">
         <h3>Analysis Report</h3>
+        <% if(indexes.reportNotEmpty()) {%>
         <ul>
         <% if (indexes.duplicateRules) {%>
             <li>Multiple rules for same type</li>
@@ -34,7 +35,20 @@
                 <%}%>
             </ul>
         <%}%>
+        <% if (indexes.duplicateProperties) {%>
+        <li>Duplicate property definitions - Properties mentioned below <b>might</b> be having duplicate index
+        entries. Note that an entry below does not always indicate a problem with config. Its just highlighted
+        so that it can be looked into once!</li>
+        <ul>
+            <% indexes.duplicateProperties.each {k,v ->%>
+            <li>$k - $v</li>
+            <%}%>
         </ul>
+        <%}%>
+        </ul>
+        <% } else { %>
+        All is well!
+        <% } %>
     </div>
 
     <% if (indexes.propertyIndexes) {%>
