@@ -11,8 +11,14 @@ class XmlConfig {
     }
 
     public Indexes parse(){
-        def content = new XmlSlurper(false, false).parseText(xml)
         Indexes indexes = new Indexes()
+        parseTo(indexes)
+        indexes.afterPropertiesSet()
+        return indexes
+    }
+
+    public void parseTo(Indexes indexes){
+        def content = new XmlSlurper(false, false).parseText(xml)
         content.children().each {idx ->
             switch (idx.@type){
                 case 'property' :
@@ -26,8 +32,6 @@ class XmlConfig {
                     break
             }
         }
-        indexes.afterPropertiesSet()
-        return indexes
     }
 
     LuceneIndex parseLuceneIndexDefn(def idx) {

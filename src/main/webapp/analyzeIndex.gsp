@@ -1,23 +1,5 @@
 <%
-    com.chetanmeh.oak.index.Indexes indexes
-    if (org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent(request)){
-        def upload = new org.apache.commons.fileupload.servlet.ServletFileUpload();
-        def itemItr = upload.getItemIterator(request)
-        if (itemItr.hasNext()){
-            def stream = itemItr.next()
-            def name = stream.name
-            def is = stream.openStream()
-            try{
-                def text = org.apache.commons.fileupload.util.Streams.asString(is, 'utf-8')
-                if (name.endsWith("xml")){
-                    indexes = new com.chetanmeh.oak.index.XmlConfig(text).parse()
-                }
-            } finally {
-                is?.close()
-            }
-        }
-    }
-
+    com.chetanmeh.oak.index.Indexes indexes = com.chetanmeh.oak.index.RequestConfigHandler.getIndexInfo(request)
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -195,15 +177,16 @@
     <ul>
         <li>xml - Upload the <code>.content.xml</code> from exported index definition content package</li>
         <li>json - Upload the json from http://host:port/oak:index.tidy.-1.json</li>
+        <li>zip - Content package zip file having the index content at <i>/oak:index/.content.xml</i></li>
     </ul>
 
     <form method="POST" enctype="multipart/form-data">
         <label class="file">
-            <input type="file" id="file">
+            <input type="file" id="file" name="indexConfig">
             <span class="file-custom"></span>
-            <small class="text-muted">xml or json file containing exported index config</small>
+            <small class="text-muted">xml, zip or json file containing exported index config</small>
         </label>
-        <button type="submit" class="btn btn-primary">Analyze</button>
+        <input type="submit" value="Analyze">
     </form>
     <a href="/">Back</a>
     </div>
