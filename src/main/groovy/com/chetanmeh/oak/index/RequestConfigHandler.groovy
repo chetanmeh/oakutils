@@ -36,6 +36,9 @@ class RequestConfigHandler {
             readFromContentPackage(is, indexes)
             indexes.afterPropertiesSet()
             return indexes
+        } else if (fileName.endsWith("json")){
+            def text = Streams.asString(is, 'utf-8')
+            return new JsonConfig(text).parse()
         }
         return null
     }
