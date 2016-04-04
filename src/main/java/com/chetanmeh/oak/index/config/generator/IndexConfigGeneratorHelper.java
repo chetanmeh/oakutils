@@ -3,12 +3,18 @@ package com.chetanmeh.oak.index.config.generator;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.jackrabbit.oak.spi.state.NodeState;
 
 public class IndexConfigGeneratorHelper {
     public static NodeState getIndexConfig(String queryText) throws Exception {
-        IndexConfigGenerator generator = new IndexConfigGenerator();
+        return getIndexConfig(queryText, Collections.<String>emptyList());
+    }
+
+    public static NodeState getIndexConfig(String queryText, List<String> nodeTypes) throws Exception {
+        IndexConfigGenerator generator = new IndexConfigGenerator(nodeTypes);
         extractQueriesAndGenerateIndex(queryText, generator);
         NodeState result = generator.getIndexConfig();
         return result;
