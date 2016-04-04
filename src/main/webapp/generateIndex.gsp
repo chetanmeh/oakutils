@@ -6,7 +6,13 @@ select * from [nt:base] where foo = 'bar'
     '''
 
     String queryText = request.getParameter("queries") ?: QUERY_DEFAULT;
-    def indexNodeState = com.chetanmeh.oak.index.config.generator.IndexConfigGeneratorHelper.getIndexConfig(queryText)
+    def error
+    def indexNodeState = org.apache.jackrabbit.oak.plugins.memory.EmptyNodeState.EMPTY_NODE
+    try {
+        indexNodeState = com.chetanmeh.oak.index.config.generator.IndexConfigGeneratorHelper.getIndexConfig(queryText)
+    }catch (Throwable t){
+        error = com.google.common.base.Throwables.getStackTraceAsString(t)
+    }
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,6 +42,7 @@ select * from [nt:base] where foo = 'bar'
         <a href="/">Back</a>
     </div>
 
+    <% if (error == null){%>
     <div class="row">
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#output-text">Text</a></li>
@@ -53,6 +60,11 @@ select * from [nt:base] where foo = 'bar'
                 <textarea id="output-display-xml">${com.chetanmeh.oak.state.export.NodeStateExporter.toXml(indexNodeState)}</textarea>
             </div>
         </div>
+    <% } else { %>
+        <div class="row">
+            <textarea id="output-error">${error}</textarea>
+        </div>
+    <% } %>
     </div>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -64,22 +76,30 @@ select * from [nt:base] where foo = 'bar'
 <script src="/codemirror/mode/javascript.js"></script>
 <script>
     jQuery(document).ready(function(){
-        var editors = {
-            'output-text' : CodeMirror.fromTextArea(document.getElementById("output-display-text"), {
-                lineNumbers: true
-            }),
-            'output-json' : CodeMirror.fromTextArea(document.getElementById("output-display-json"), {
-                lineNumbers: true, mode: "application/json"
-            }),
-            'output-xml' : CodeMirror.fromTextArea(document.getElementById("output-display-xml"), {
-                lineNumbers: true, mode: "application/xml"
-            })
-        };
+        var error = ${error != null}
+        if(!error) {
+            var editors = {
+                'output-text': CodeMirror.fromTextArea(document.getElementById("output-display-text"), {
+                    lineNumbers: true
+                }),
+                'output-json': CodeMirror.fromTextArea(document.getElementById("output-display-json"), {
+                    lineNumbers: true, mode: "application/json"
+                }),
+                'output-xml': CodeMirror.fromTextArea(document.getElementById("output-display-xml"), {
+                    lineNumbers: true, mode: "application/xml"
+                })
+            };
 
-        jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var target = jQuery(e.target).attr("href").substring(1); // activated tab
-            editors[target].refresh();
-        });
+            jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var target = jQuery(e.target).attr("href").substring(1); // activated tab
+                editors[target].refresh();
+            });
+
+        } else {
+            CodeMirror.fromTextArea(document.getElementById("output-error"), {
+                lineNumbers: true, mode: "text/plain"
+            });
+        }
     })
 </script>
 </body>
