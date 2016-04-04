@@ -71,7 +71,7 @@ public class IndexConfigGeneratorHelper {
             while (true) {
                 reader.mark(4096);
                 String next = reader.readLine();
-                if (next == null || !next.startsWith(" ")) {
+                if (next == null || next.trim().length() == 0) {
                     reader.reset();
                     return line;
                 }

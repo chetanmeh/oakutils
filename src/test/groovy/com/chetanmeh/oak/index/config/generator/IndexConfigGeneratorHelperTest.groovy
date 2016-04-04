@@ -15,8 +15,23 @@ select * from [nt:base] where foo = 'bar\'
 ''')
     }
 
+    @Test
+    public void multipleQueries() throws Exception{
+        dumpIndex('''SELECT
+  *
+FROM [nt:base] AS a
+WHERE
+  a.[jcr:content/metadata/status] = 'published\'
+ORDER BY
+  a.[jcr:content/metadata/jcr:lastModified] DESC
+
+select * from [nt:base] where foo = 1''')
+    }
+
     def dumpIndex(String queryText){
         NodeState state = IndexConfigGeneratorHelper.getIndexConfig(queryText)
         println NodeStateExporter.toCND(state)
     }
+
+
 }
