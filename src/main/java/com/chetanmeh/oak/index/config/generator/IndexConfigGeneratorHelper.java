@@ -1,19 +1,21 @@
-package com.chetanmeh.oak.index.config.generator
+package com.chetanmeh.oak.index.config.generator;
 
-import org.apache.jackrabbit.oak.query.QueryEngineImpl
-import org.apache.jackrabbit.oak.spi.state.NodeState
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.StringReader;
 
+import org.apache.jackrabbit.oak.spi.state.NodeState;
 
-class IndexConfigGeneratorHelper {
-
-    static NodeState getIndexConfig(String queryText) {
-        IndexConfigGenerator generator = new IndexConfigGenerator()
-        extractQueriesAndGenerateIndex(queryText, generator)
-        NodeState result = generator.getIndexConfig()
-        return result
+public class IndexConfigGeneratorHelper {
+    public static NodeState getIndexConfig(String queryText) throws Exception {
+        IndexConfigGenerator generator = new IndexConfigGenerator();
+        extractQueriesAndGenerateIndex(queryText, generator);
+        NodeState result = generator.getIndexConfig();
+        return result;
     }
 
-    private static void extractQueriesAndGenerateIndex(String queryText, IndexConfigGenerator generator) {
+    private static void extractQueriesAndGenerateIndex(String queryText, IndexConfigGenerator generator) throws
+            Exception{
         ContinueLineReader r = new ContinueLineReader(new LineNumberReader(new StringReader(queryText)));
         while (true) {
             String line = r.readLine();
@@ -23,20 +25,21 @@ class IndexConfigGeneratorHelper {
             line = line.trim();
 
             if (line.startsWith("#") || line.length() == 0) {
-                continue
+                continue;
             }
 
-            if (line.startsWith("select")
-                    || line.startsWith("sql1") || line.startsWith("xpath")) {
-                String language = QueryEngineImpl.SQL2;
-                if (line.startsWith("sql1 ")) {
-                    language = QueryEngineImpl.SQL;
+            String lowercasedLine = line.toLowerCase();
+            if (lowercasedLine.startsWith("select")
+                    || lowercasedLine.startsWith("sql1") || lowercasedLine.startsWith("xpath")) {
+                String language = "JCR-SQL2";
+                if (lowercasedLine.startsWith("sql1 ")) {
+                    language = "sql";
                     line = line.substring("sql1 ".length());
-                } else if (line.startsWith("xpath ")) {
-                    language = QueryEngineImpl.XPATH;
+                } else if (lowercasedLine.startsWith("xpath ")) {
+                    language = "xpath";
                     line = line.substring("xpath ".length());
                 }
-                generator.process(line, language)
+                generator.process(line, language);
             }
         }
     }
@@ -52,10 +55,6 @@ class IndexConfigGeneratorHelper {
 
         ContinueLineReader(LineNumberReader reader) {
             this.reader = reader;
-        }
-
-        public void close() throws IOException {
-            reader.close();
         }
 
         public String readLine() throws IOException {

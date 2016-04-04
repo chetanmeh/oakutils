@@ -36,7 +36,7 @@ class IndexConfigGenerator{
     private QueryEngine queryEngine;
     private IndexDefinitionBuilder builder = new IndexDefinitionBuilder();
 
-    public IndexConfigGenerator() throws LoginException, NoSuchWorkspaceException {
+    public IndexConfigGenerator(){
         //On GAE instantiating the whole Oak class causes issues as some calls made by
         //Oak are blocked like those accessing MBeans
         final Root root = new ImmutableRoot(INITIAL_CONTENT);
@@ -57,8 +57,7 @@ class IndexConfigGenerator{
     }
 
     public void process(String statement, String language) throws ParseException {
-        String lang = statement.startsWith("/") ? "xpath" : "JCR-SQL2";
-        queryEngine.executeQuery(statement, lang, null, null);
+        queryEngine.executeQuery(statement, language, null, null);
     }
 
     public NodeState getIndexConfig(){
