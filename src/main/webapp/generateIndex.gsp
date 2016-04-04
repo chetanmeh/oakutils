@@ -2,7 +2,13 @@
     def QUERY_DEFAULT = '''
 #Paste your queries here
 
-select * from [nt:base] where foo = 'bar'
+SELECT
+  *
+FROM [dam:Asset] AS a
+WHERE
+  a.[jcr:content/metadata/status] = 'published\'
+ORDER BY
+  a.[jcr:content/metadata/jcr:lastModified] DESC
     '''
 
     String queryText = request.getParameter("queries") ?: QUERY_DEFAULT;
@@ -30,7 +36,7 @@ select * from [nt:base] where foo = 'bar'
 <body>
 <div class="container">
     <div class="row">
-        <h1 class="display-1 text-center">Index Definition Generator</h1>
+        <h1 class="display-1 text-center">Oak Index Definition Generator</h1>
         <p class="lead">Generates an index definition for a given set of queries</p>
         <form method="POST">
             <div class="form-group">
@@ -74,6 +80,7 @@ select * from [nt:base] where foo = 'bar'
 <script src="/codemirror/lib/codemirror.js"></script>
 <script src="/codemirror/mode/xml.js"></script>
 <script src="/codemirror/mode/javascript.js"></script>
+<script src="/codemirror/mode/sql.js"></script>
 <script>
     jQuery(document).ready(function(){
         var error = ${error != null}
@@ -100,6 +107,10 @@ select * from [nt:base] where foo = 'bar'
                 lineNumbers: true, mode: "text/plain"
             });
         }
+
+        CodeMirror.fromTextArea(document.getElementById("queries"), {
+            lineNumbers: true, mode: "text/x-sql"
+        });
     })
 </script>
 </body>
