@@ -1,4 +1,4 @@
-package com.chetanmeh.oak.index
+package com.chetanmeh.oak.index.config.parser
 
 import org.apache.jackrabbit.oak.commons.PathUtils
 

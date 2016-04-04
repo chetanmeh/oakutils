@@ -1,4 +1,4 @@
-package com.chetanmeh.oak.index
+package com.chetanmeh.oak.index.config.parser
 
 import groovy.util.slurpersupport.GPathResult
 

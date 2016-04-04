@@ -1,5 +1,5 @@
 <%
-    com.chetanmeh.oak.index.Indexes indexes = com.chetanmeh.oak.index.RequestConfigHandler.getIndexInfo(request)
+    com.chetanmeh.oak.index.config.parser.Indexes indexes = com.chetanmeh.oak.index.config.parser.RequestConfigHandler.getIndexInfo(request)
 %>
 <!DOCTYPE html>
 <html lang="en">

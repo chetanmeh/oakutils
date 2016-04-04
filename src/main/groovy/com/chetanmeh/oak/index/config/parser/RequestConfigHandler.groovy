@@ -1,4 +1,4 @@
-package com.chetanmeh.oak.index
+package com.chetanmeh.oak.index.config.parser
 
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.util.Streams
