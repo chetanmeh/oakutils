@@ -6,12 +6,10 @@ select * from [nt:base] where foo = 'bar'
     '''
 
     String queryText = request.getParameter("queries") ?: QUERY_DEFAULT;
-    String nodeType = request.getParameter("nodeType") ?: 'nt:base';
     def error
     def indexNodeState = org.apache.jackrabbit.oak.plugins.memory.EmptyNodeState.EMPTY_NODE
     try {
-        def nodeTypes = nodeType.tokenize(',')
-        indexNodeState = com.chetanmeh.oak.index.config.generator.IndexConfigGeneratorHelper.getIndexConfig(queryText, nodeTypes)
+        indexNodeState = com.chetanmeh.oak.index.config.generator.IndexConfigGeneratorHelper.getIndexConfig(queryText)
     }catch (Throwable t){
         error = com.google.common.base.Throwables.getStackTraceAsString(t)
     }
@@ -38,11 +36,6 @@ select * from [nt:base] where foo = 'bar'
             <div class="form-group">
                 <label for="queries">Queries</label>
                 <textarea class="form-control" rows="3" name="queries" id="queries">${queryText}</textarea>
-            </div>
-            <div class="form-group">
-                <label for="nodeType">Node Type</label>
-                <input class="form-control" name="nodeType" id="nodeType" type="text" value="${nodeType}">
-                <small class="text-muted">Nodetype names used in the query</small>
             </div>
             <input type="submit" value="Generate">
         </form>

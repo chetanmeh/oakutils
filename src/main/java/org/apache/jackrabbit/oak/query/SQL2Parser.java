@@ -18,6 +18,7 @@ package org.apache.jackrabbit.oak.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.apache.jackrabbit.oak.plugins.memory.EmptyNodeState.EMPTY_NODE;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -29,6 +30,7 @@ import java.util.Map;
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.oak.api.PropertyValue;
 import org.apache.jackrabbit.oak.api.QueryEngine;
 import org.apache.jackrabbit.oak.api.Type;
@@ -249,7 +251,12 @@ public class SQL2Parser {
         }
         NodeState type = types.getChildNode(nodeTypeName);
         if (!type.exists()) {
-            throw getSyntaxError("unknown node type");
+            if (!settings.isNodeTypeCheckEnabled()){
+                type = EMPTY_NODE.builder().setProperty(JcrConstants.JCR_NODETYPENAME, nodeTypeName, Type.NAME)
+                        .getNodeState();
+            } else {
+                throw getSyntaxError("unknown node type");
+            }
         }
 
         String selectorName = nodeTypeName;

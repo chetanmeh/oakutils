@@ -18,4 +18,8 @@ public class QueryEngineSettings {
     public boolean getFullTextComparisonWithoutIndex() {
         return false;
     }
+
+    public boolean isNodeTypeCheckEnabled(){
+        return false;
+    }
 }

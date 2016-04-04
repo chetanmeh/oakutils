@@ -6,7 +6,7 @@ import org.junit.Test
 
 
 class IndexConfigGeneratorTest {
-    IndexConfigGenerator generator = new IndexConfigGenerator([])
+    IndexConfigGenerator generator = new IndexConfigGenerator()
 
     @After
     public void dumpIndexConfig(){
@@ -20,7 +20,6 @@ class IndexConfigGeneratorTest {
 
     @Test
     void generateIndexConfig2(){
-        generator = new IndexConfigGenerator(['dam:Asset'])
 //        generator.process("SELECT  *  FROM [dam:Asset] AS a  WHERE   a.[jcr:content/metadata/status] = 'published'  ORDER BY  a.[jcr:content/metadata/jcr:lastModified] DESC")
         generator.process("SELECT  *  FROM [dam:Asset] AS a  WHERE   a.[jcr:content/metadata/status] = 'published'  " +
                 "ORDER BY  a.[jcr:content/metadata/jcr:lastModified] DESC")

@@ -8,23 +8,14 @@ import javax.jcr.PropertyType;
 
 import com.chetanmeh.oak.index.config.IndexDefinitionBuilder;
 import com.google.appengine.labs.repackaged.com.google.common.collect.ImmutableList;
-import org.apache.commons.io.IOUtils;
 import org.apache.jackrabbit.oak.api.QueryEngine;
 import org.apache.jackrabbit.oak.api.Root;
 import org.apache.jackrabbit.oak.api.Type;
 import org.apache.jackrabbit.oak.commons.PathUtils;
 import org.apache.jackrabbit.oak.core.ImmutableRoot;
-import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeStore;
-import org.apache.jackrabbit.oak.plugins.memory.ModifiedNodeState;
-import org.apache.jackrabbit.oak.plugins.name.NamespaceEditorProvider;
-import org.apache.jackrabbit.oak.plugins.nodetype.TypeEditorProvider;
-import org.apache.jackrabbit.oak.plugins.nodetype.write.NodeTypeRegistry;
-import org.apache.jackrabbit.oak.plugins.tree.RootFactory;
 import org.apache.jackrabbit.oak.query.ExecutionContext;
 import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
-import org.apache.jackrabbit.oak.spi.commit.CompositeEditorProvider;
-import org.apache.jackrabbit.oak.spi.commit.EditorHook;
 import org.apache.jackrabbit.oak.spi.query.Cursor;
 import org.apache.jackrabbit.oak.spi.query.Filter;
 import org.apache.jackrabbit.oak.spi.query.Filter.PathRestriction;
@@ -33,10 +24,7 @@ import org.apache.jackrabbit.oak.spi.query.QueryConstants;
 import org.apache.jackrabbit.oak.spi.query.QueryIndex;
 import org.apache.jackrabbit.oak.spi.query.QueryIndex.OrderEntry;
 import org.apache.jackrabbit.oak.spi.query.QueryIndexProvider;
-import org.apache.jackrabbit.oak.spi.state.ApplyDiff;
-import org.apache.jackrabbit.oak.spi.state.NodeBuilder;
 import org.apache.jackrabbit.oak.spi.state.NodeState;
-import org.apache.jackrabbit.oak.spi.state.NodeStore;
 
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.IndexRule;
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.PropertyRule;
@@ -46,16 +34,13 @@ class IndexConfigGenerator{
     private QueryEngine queryEngine;
     private IndexDefinitionBuilder builder = new IndexDefinitionBuilder();
 
-    public IndexConfigGenerator(List<String> nodeTypes){
-        //On GAE instantiating the whole Oak class causes issues as some calls made by
-        //Oak are blocked like those accessing MBeans
-        final NodeState state = populateExtraNodeTypes(INITIAL_CONTENT, nodeTypes);
-        final Root root = new ImmutableRoot(state);
+    public IndexConfigGenerator(){
+        final Root root = new ImmutableRoot(INITIAL_CONTENT);
         queryEngine = new QueryEngineImpl() {
             @Override
             protected ExecutionContext getExecutionContext() {
                 return new ExecutionContext(
-                        state, root,
+                        INITIAL_CONTENT, root,
                         new QueryEngineSettings(),
                         new LuceneIndexGeneratingIndexProvider(), null);
             }
@@ -198,35 +183,5 @@ class IndexConfigGenerator{
         public Cursor query(QueryIndex.IndexPlan plan, NodeState rootState) {
             return null;
         }
-    }
-
-    private NodeState populateExtraNodeTypes(NodeState state, List<String> nodeTypes) {
-        if (nodeTypes.isEmpty()){
-            return state;
-        }
-        NodeBuilder builder = state.builder();
-        //Add dummpy nodetype definitions for each given nodeType
-        for (String type : nodeTypes){
-            String defn = String.format("[%s]\n" +
-                    " - * (UNDEFINED) multiple\n" +
-                    " - * (UNDEFINED)\n" +
-                    " + * (nt:base) = %s VERSION", type, type);
-            registerNodeType(builder, defn);
-
-        }
-        return builder.getNodeState();
-    }
-
-    private static void registerNodeType(NodeBuilder builder, String nodeTypeDefn){
-        //Taken from org.apache.jackrabbit.oak.plugins.nodetype.write.InitialContent
-        NodeState base = ModifiedNodeState.squeeze(builder.getNodeState());
-        NodeStore store = new MemoryNodeStore(base);
-        Root root = RootFactory.createSystemRoot(
-                store, new EditorHook(new CompositeEditorProvider(
-                        new NamespaceEditorProvider(),
-                        new TypeEditorProvider())), null, null, null, null);
-        NodeTypeRegistry.register(root, IOUtils.toInputStream(nodeTypeDefn), "test node types");
-        NodeState target = store.getRoot();
-        target.compareAgainstBaseState(base, new ApplyDiff(builder));
     }
 }
