@@ -39,6 +39,8 @@ public class IndexConfigGeneratorHelper {
                 } else if (lowercasedLine.startsWith("xpath ")) {
                     language = "xpath";
                     line = line.substring("xpath ".length());
+                } else if (lowercasedLine.startsWith("/")){
+                    language = "xpath";
                 }
                 generator.process(line, language);
             }
