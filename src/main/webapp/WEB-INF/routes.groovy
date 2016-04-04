@@ -1,2 +1,2 @@
 all "/formatter", forward: "/revisionFormatter.gsp"
-all "/analyze", forward: "/analyzeIndex.gsp"
+all "/analyze/index", forward: "/analyzeIndex.gsp"
