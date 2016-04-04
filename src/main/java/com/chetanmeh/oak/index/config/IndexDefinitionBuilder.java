@@ -62,7 +62,7 @@ public class IndexDefinitionBuilder {
         return rule;
     }
 
-    private static class IndexRule {
+    public static class IndexRule {
         private final NodeBuilder builder;
         private final NodeBuilder propertiesBuilder;
         private final Map<String, PropertyRule> props = Maps.newHashMap();
@@ -87,7 +87,7 @@ public class IndexDefinitionBuilder {
         }
     }
 
-    private static class PropertyRule {
+    public static class PropertyRule {
         private final IndexRule indexRule;
         private final NodeBuilder builder;
 
