@@ -62,6 +62,11 @@ public class IndexConfigGeneratorHelper {
             if (line == null || line.trim().length() == 0) {
                 return line;
             }
+
+            if (line.startsWith("#")){
+                return line;
+            }
+
             while (true) {
                 reader.mark(4096);
                 String next = reader.readLine();
