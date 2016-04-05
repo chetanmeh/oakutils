@@ -172,6 +172,8 @@ class IndexConfigGenerator{
             PropertyRule propRule = rule.property(pr.propertyName);
             if (pr.isNullRestriction()){
                 propRule.nullCheckEnabled();
+            } else if (pr.isNotNullRestriction()){
+                propRule.notNullCheckEnabled();
             }
             propRule.propertyIndex();
         }
