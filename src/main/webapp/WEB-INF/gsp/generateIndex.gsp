@@ -9,6 +9,17 @@ WHERE
   a.[jcr:content/metadata/status] = 'published'
 ORDER BY
   a.[jcr:content/metadata/jcr:lastModified] DESC
+
+# There can be multiple queries added here and index generated would cover all
+# of them
+SELECT
+  *
+FROM [dam:Asset]
+WHERE
+  CONTAINS([mimetype], 'text/plain')
+
+# You can also include xpath queries
+/jcr:root/content/dam/element(*, dam:Asset)[@valid]
     '''
 
     String queryText = request.getParameter("queries") ?: QUERY_DEFAULT;
