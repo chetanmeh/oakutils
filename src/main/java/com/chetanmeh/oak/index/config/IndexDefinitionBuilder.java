@@ -56,7 +56,7 @@ public class IndexDefinitionBuilder {
     public IndexRule indexRule(String type){
         IndexRule rule = rules.get(type);
         if (rule == null){
-            rule = new IndexRule(createChild(indexRule, type));
+            rule = new IndexRule(createChild(indexRule, type), type);
             rules.put(type, rule);
         }
         return rule;
@@ -65,11 +65,13 @@ public class IndexDefinitionBuilder {
     public static class IndexRule {
         private final NodeBuilder builder;
         private final NodeBuilder propertiesBuilder;
+        private final String ruleName;
         private final Map<String, PropertyRule> props = Maps.newHashMap();
 
-        private IndexRule(NodeBuilder builder) {
+        private IndexRule(NodeBuilder builder, String type) {
             this.builder = builder;
             this.propertiesBuilder = createChild(builder, LuceneIndexConstants.PROP_NODE);
+            this.ruleName = type;
         }
 
         public IndexRule indexNodeName(){
@@ -84,6 +86,10 @@ public class IndexDefinitionBuilder {
                 props.put(name, propRule);
             }
             return propRule;
+        }
+
+        public String getRuleName() {
+            return ruleName;
         }
     }
 
@@ -167,7 +173,7 @@ public class IndexDefinitionBuilder {
         return rule;
     }
 
-    private static class AggregateRule {
+    public static class AggregateRule {
         private final NodeBuilder builder;
         private final Map<String, Include> includes = Maps.newHashMap();
 
@@ -185,7 +191,7 @@ public class IndexDefinitionBuilder {
             return include;
         }
 
-        private static class Include {
+        public static class Include {
             private final NodeBuilder builder;
 
             private Include(NodeBuilder builder) {

@@ -25,4 +25,31 @@ class IndexConfigGeneratorTest {
                 "ORDER BY  a.[jcr:content/metadata/jcr:lastModified] DESC")
     }
 
+    @Test
+    public void fulltext() throws Exception{
+        generator.process('''SELECT
+  *
+FROM [app:Asset]
+WHERE
+  CONTAINS([jcr:content/metadata/comment], 'december')''')
+    }
+
+
+    @Test
+    public void fulltext2() throws Exception{
+        generator.process('''SELECT
+  *
+FROM [app:Asset]
+WHERE
+  CONTAINS([jcr:content/metadata/*], 'december')''')
+    }
+
+    @Test
+    public void fulltext3() throws Exception{
+        generator.process('''SELECT
+  *
+FROM [app:Asset]
+WHERE
+  CONTAINS([month], 'december')''')
+    }
 }
