@@ -32,44 +32,7 @@ ORDER BY
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link rel="stylesheet" href="/codemirror/lib/codemirror.css">
-    <%
-        //http://stackoverflow.com/a/27727359/1035417
-        //Custom style to allow textarea have look of bootstrap
-    %>
-    <style>
-    .CodeMirror {
-        /* Bootstrap Settings */
-        box-sizing: border-box;
-        margin: 0;
-        font: inherit;
-        overflow: auto;
-        font-family: inherit;
-        display: block;
-        width: 100%;
-        padding: 6px 12px;
-        font-size: 14px;
-        line-height: 1.42857143;
-        color: #555;
-        background-color: #fff;
-        background-image: none;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-        /* Code Mirror Settings */
-        font-family: monospace;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .CodeMirror-focused {
-        /* Bootstrap Settings */
-        border-color: #66afe9;
-        outline: 0;
-        box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
-        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-    }
-    </style>
+    <link rel="stylesheet" href="/css/generateIndex.css">
 </head>
 <body>
 <div class="container">
@@ -119,37 +82,10 @@ ORDER BY
 <script src="/codemirror/mode/xml.js"></script>
 <script src="/codemirror/mode/javascript.js"></script>
 <script src="/codemirror/mode/sql.js"></script>
+<script src="/js/generateIndex.js"></script>
 <script>
-    jQuery(document).ready(function(){
-        var error = ${error != null}
-        if(!error) {
-            var editors = {
-                'output-text': CodeMirror.fromTextArea(document.getElementById("output-display-text"), {
-                    lineNumbers: true
-                }),
-                'output-json': CodeMirror.fromTextArea(document.getElementById("output-display-json"), {
-                    lineNumbers: true, mode: "application/json"
-                }),
-                'output-xml': CodeMirror.fromTextArea(document.getElementById("output-display-xml"), {
-                    lineNumbers: true, mode: "application/xml"
-                })
-            };
-
-            jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var target = jQuery(e.target).attr("href").substring(1); // activated tab
-                editors[target].refresh();
-            });
-
-        } else {
-            CodeMirror.fromTextArea(document.getElementById("output-error"), {
-                lineNumbers: true, mode: "text/plain"
-            });
-        }
-
-        CodeMirror.fromTextArea(document.getElementById("queries"), {
-            lineNumbers: true, mode: "text/x-sql"
-        });
-    })
+    var error = ${error != null}
+    configureEditors(error);
 </script>
 </body>
 </html>
