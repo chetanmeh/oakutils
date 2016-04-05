@@ -23,7 +23,9 @@
             <li>Index Count - <%= indexes.noOfIndexes() %></li>
             <li><a href="#lucene-index">Lucene Index Count -</a><%= indexes.luceneIndexes.size() %></li>
             <li><a href="#property-index">Property Index Count - </a><%= indexes.propertyIndexes.size() %></li>
+            <% if (indexes.nodeTypeIndex) {%>
             <li><a href="#node-type-index">NodeType Index Count - </a><%= indexes.nodeTypeIndex.declaringNodeTypesList.size()%></li>
+            <% } %>
             <li>Disabled Index Count - <%= indexes.disabledIndexes.size() %></li>
         </ul>
         <a href="/">Back</a>
