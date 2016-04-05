@@ -39,5 +39,30 @@ select * from [nt:base] where foo = 1''')
 
     }
 
+    @Test
+    public void multi2() throws Exception{
+        dumpIndex('''#Paste your queries here
+
+SELECT
+  *
+FROM [dam:Asset] AS a
+WHERE
+  a.[jcr:content/metadata/status] = 'published\'
+ORDER BY
+  a.[jcr:content/metadata/jcr:lastModified] DESC
+
+# There can be multiple queries added here and index generated would cover all
+# of them
+
+SELECT
+  *
+FROM [dam:Asset]
+WHERE
+  CONTAINS([mimetype], 'text/plain')
+
+# You can also include xpath queries
+/jcr:root/content/dam/element(*, dam:Asset)[@valid]''')
+    }
+
 
 }
