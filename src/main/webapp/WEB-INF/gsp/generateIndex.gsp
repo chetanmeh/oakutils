@@ -14,8 +14,13 @@ ORDER BY
     String queryText = request.getParameter("queries") ?: QUERY_DEFAULT;
     def error
     def indexNodeState = org.apache.jackrabbit.oak.plugins.memory.EmptyNodeState.EMPTY_NODE
+    def indexRuleNames = "" // '|' seperated list of rule names
     try {
         indexNodeState = com.chetanmeh.oak.index.config.generator.IndexConfigGeneratorHelper.getIndexConfig(queryText)
+        indexRuleNames = indexNodeState.getChildNode('indexRules')
+                .childNodeEntries
+                .collect {it.name}
+                .join('|')
     }catch (Throwable t){
         error = com.google.common.base.Throwables.getStackTraceAsString(t)
     }
@@ -82,10 +87,12 @@ ORDER BY
 <script src="/codemirror/mode/xml.js"></script>
 <script src="/codemirror/mode/javascript.js"></script>
 <script src="/codemirror/mode/sql.js"></script>
+<script src="/codemirror/mode/simple.js"></script>
 <script src="/js/generateIndex.js"></script>
 <script>
-    var error = ${error != null}
-    configureEditors(error);
+    var error = ${error != null};
+    var ruleNames = "${indexRuleNames}";
+    configureEditors(error, ruleNames);
 </script>
 </body>
 </html>
