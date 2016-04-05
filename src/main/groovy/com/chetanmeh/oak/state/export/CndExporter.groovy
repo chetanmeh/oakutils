@@ -37,18 +37,20 @@ class CndExporter {
     private static void copyNode(NodeState state, StringBuilder buffer, int depth) {
         copyProperties(state, buffer, depth)
         state.childNodeEntries.each { ChildNodeEntry cne ->
-            buffer << Strings.repeat(" ", depth + 1) + " + ${cne.name} (${cne.nodeState.getName("jcr:primaryType")})\n"
+            String primaryType = cne.nodeState.getName("jcr:primaryType")
+            String typeText = primaryType != 'nt:unstructured' ? "($primaryType)" : ''
+            buffer << Strings.repeat(" ", depth + 1) + " + ${cne.name} $typeText\n"
             copyNode(cne.nodeState, buffer, depth + 1)
         }
     }
 
     private static void copyProperties(NodeState state, StringBuilder buffer, int depth) {
         state.properties.each { PropertyState ps ->
-            if (ps.name == 'jcr:primaryType'){
+            String value = ps.getValue(ps.getType()).toString()
+            if (ps.name == 'jcr:primaryType' && value == 'nt:unstructured'){
                 return
             }
 
-            String value = ps.getValue(ps.getType()).toString()
             if (ps.type == Type.STRING){
                 value = "\"$value\""
             }
