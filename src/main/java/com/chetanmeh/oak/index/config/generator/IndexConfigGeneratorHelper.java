@@ -31,14 +31,11 @@ public class IndexConfigGeneratorHelper {
 
             String lowercasedLine = line.toLowerCase();
             if (lowercasedLine.startsWith("select")
-                    || lowercasedLine.startsWith("sql1") || lowercasedLine.startsWith("xpath")) {
+                    || lowercasedLine.startsWith("sql1") || lowercasedLine.startsWith("/")) {
                 String language = "JCR-SQL2";
                 if (lowercasedLine.startsWith("sql1 ")) {
                     language = "sql";
                     line = line.substring("sql1 ".length());
-                } else if (lowercasedLine.startsWith("xpath ")) {
-                    language = "xpath";
-                    line = line.substring("xpath ".length());
                 } else if (lowercasedLine.startsWith("/")){
                     language = "xpath";
                 }

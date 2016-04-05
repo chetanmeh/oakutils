@@ -33,5 +33,11 @@ select * from [nt:base] where foo = 1''')
         println NodeStateExporter.toCND(state)
     }
 
+    @Test
+    public void xpath() throws Exception{
+        dumpIndex('''/jcr:root/content/dam/element(*, dam:Asset)[@valid]''')
+
+    }
+
 
 }
