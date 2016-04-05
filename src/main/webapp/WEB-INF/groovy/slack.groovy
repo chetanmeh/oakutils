@@ -1,6 +1,5 @@
 import com.chetanmeh.oak.index.config.generator.IndexConfigGeneratorHelper
 import com.chetanmeh.oak.state.export.NodeStateExporter
-import com.google.common.base.Throwables
 import groovy.json.JsonOutput
 
 String command = request.getParameter('command')
