@@ -72,7 +72,7 @@ class XmlExporter {
         def map = [:]
         state.properties.each { PropertyState ps ->
             String value
-            if (ps.type == Type.STRING){
+            if (ps.type == Type.STRING || ps.name == 'jcr:primaryType'){
                 value = ps.getValue(Type.STRING)
             } else {
                 String typeName = PropertyType.nameFromValue(ps.type.tag())
