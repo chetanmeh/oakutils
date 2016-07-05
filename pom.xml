@@ -3,7 +3,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <packaging>war</packaging>
-  <version>1.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <groupId>com.chetanmeh.appengine</groupId>
   <artifactId>oakutils-war</artifactId>
 
