@@ -51,4 +51,24 @@ class IndexDefinitionBuilderTest {
         assert state.getChildNode('aggregates').getChildNode('cq:Page').exists()
 
     }
+
+    @Test
+    public void duplicatePropertyName() throws Exception{
+        builder.indexRule("nt:base")
+                .property("foo")
+                .ordered()
+                .enclosingRule()
+                .property("jcr:content/foo")
+                .analyzed()
+                .propertyIndex()
+                .enclosingRule()
+                .property("metadata/content/foo")
+                .propertyIndex()
+
+        NodeState state = builder.build()
+        assert state.getChildNode('indexRules').exists()
+        assert state.getChildNode('indexRules').getChildNode('nt:base').exists()
+        assert state.getChildNode('indexRules').getChildNode('nt:base')
+                .getChildNode("properties").getChildNodeCount(10) == 3
+    }
 }

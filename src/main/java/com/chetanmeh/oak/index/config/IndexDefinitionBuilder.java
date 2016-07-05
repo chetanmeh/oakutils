@@ -2,11 +2,14 @@ package com.chetanmeh.oak.index.config;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jcr.PropertyType;
 
 import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
 import org.apache.jackrabbit.oak.api.Type;
+import org.apache.jackrabbit.oak.commons.PathUtils;
 import org.apache.jackrabbit.oak.plugins.index.PathFilter;
 import org.apache.jackrabbit.oak.plugins.index.lucene.LuceneIndexConstants;
 import org.apache.jackrabbit.oak.spi.state.NodeBuilder;
@@ -67,6 +70,7 @@ public class IndexDefinitionBuilder {
         private final NodeBuilder propertiesBuilder;
         private final String ruleName;
         private final Map<String, PropertyRule> props = Maps.newHashMap();
+        private final Set<String> propNodeNames = Sets.newHashSet();
 
         private IndexRule(NodeBuilder builder, String type) {
             this.builder = builder;
@@ -82,10 +86,22 @@ public class IndexDefinitionBuilder {
         public PropertyRule property(String name){
             PropertyRule propRule = props.get(name);
             if (propRule == null){
-                propRule = new PropertyRule(this, createChild(propertiesBuilder, "prop" + props.size()), name);
+                propRule = new PropertyRule(this, createChild(propertiesBuilder, createPropNodeName(name)), name);
                 props.put(name, propRule);
             }
             return propRule;
+        }
+
+        private String createPropNodeName(String name) {
+            name = getSafePropName(name);
+            if (name.isEmpty()){
+                name = "prop";
+            }
+            if (propNodeNames.contains(name)){
+                name = name + "_" + propNodeNames.size();
+            }
+            propNodeNames.add(name);
+            return name;
         }
 
         public String getRuleName() {
@@ -214,5 +230,17 @@ public class IndexDefinitionBuilder {
         NodeBuilder result = builder.child(name);
         result.setProperty(JCR_PRIMARYTYPE, NT_UNSTRUCTURED, Type.NAME);
         return result;
+    }
+
+    static String getSafePropName(String relativePropName) {
+        String propName = PathUtils.getName(relativePropName);
+        int indexOfColon = propName.indexOf(':');
+        if (indexOfColon > 0){
+            propName = propName.substring(indexOfColon + 1);
+        }
+
+        //Just keep ascii chars
+        propName = propName.replaceAll("\\W", "");
+        return propName;
     }
 }
