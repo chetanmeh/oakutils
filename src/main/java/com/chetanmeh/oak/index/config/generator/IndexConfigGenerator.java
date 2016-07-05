@@ -18,6 +18,8 @@ import org.apache.jackrabbit.oak.core.ImmutableRoot;
 import org.apache.jackrabbit.oak.query.ExecutionContext;
 import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
+import org.apache.jackrabbit.oak.query.ast.NodeTypeInfo;
+import org.apache.jackrabbit.oak.query.ast.NodeTypeInfoProvider;
 import org.apache.jackrabbit.oak.query.fulltext.FullTextContains;
 import org.apache.jackrabbit.oak.query.fulltext.FullTextExpression;
 import org.apache.jackrabbit.oak.query.fulltext.FullTextTerm;
@@ -50,7 +52,12 @@ class IndexConfigGenerator{
                 return new ExecutionContext(
                         INITIAL_CONTENT, root,
                         new QueryEngineSettings(),
-                        new LuceneIndexGeneratingIndexProvider(), null);
+                        new LuceneIndexGeneratingIndexProvider(), null){
+                    @Override
+                    public NodeTypeInfoProvider getNodeTypeInfoProvider() {
+                        return DummyNodeTypeInfoProvider.INSTANCE;
+                    }
+                };
             }
         };
     }
@@ -264,6 +271,58 @@ class IndexConfigGenerator{
         @Override
         public Cursor query(QueryIndex.IndexPlan plan, NodeState rootState) {
             return null;
+        }
+    }
+
+    private enum DummyNodeTypeInfoProvider implements NodeTypeInfoProvider {
+        INSTANCE;
+
+        @Override
+        public NodeTypeInfo getNodeTypeInfo(String nodeTypeName) {
+            return new DummyNodeTypeInfo(nodeTypeName);
+        }
+    }
+
+    private static class DummyNodeTypeInfo implements NodeTypeInfo {
+        private final String nodeTypeName;
+
+        private DummyNodeTypeInfo(String nodeTypeName) {
+            this.nodeTypeName = nodeTypeName;
+        }
+
+        @Override
+        public boolean exists() {
+            return true;
+        }
+
+        @Override
+        public String getNodeTypeName() {
+            return nodeTypeName;
+        }
+
+        @Override
+        public Set<String> getSuperTypes() {
+            return Sets.newHashSet();
+        }
+
+        @Override
+        public Set<String> getPrimarySubTypes() {
+            return Sets.newHashSet();
+        }
+
+        @Override
+        public Set<String> getMixinSubTypes() {
+            return Sets.newHashSet();
+        }
+
+        @Override
+        public boolean isMixin() {
+            return false;
+        }
+
+        @Override
+        public Iterable<String> getNamesSingleValuesProperties() {
+            return Sets.newHashSet();
         }
     }
 }
