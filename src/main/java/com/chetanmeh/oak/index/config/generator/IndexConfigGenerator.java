@@ -74,7 +74,16 @@ class IndexConfigGenerator{
         processFulltextConstraints(filter, rule);
         processPropertyRestrictions(filter, rule);
         processSortConditions(sortOrder, rule);
+        processPureNodeTypeConstraints(filter, rule);
 
+    }
+
+    private void processPureNodeTypeConstraints(Filter filter, IndexRule rule) {
+        if (filter.getFullTextConstraint() == null
+                && filter.getPropertyRestrictions().isEmpty()
+                && !"nt:base".equals(filter.getNodeType())){
+            rule.property("jcr:primaryType").propertyIndex();
+        }
     }
 
     private void processFulltextConstraints(Filter filter, final IndexRule rule) {
