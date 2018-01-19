@@ -20,10 +20,10 @@ import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfo;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfoProvider;
-import org.apache.jackrabbit.oak.query.fulltext.FullTextContains;
-import org.apache.jackrabbit.oak.query.fulltext.FullTextExpression;
-import org.apache.jackrabbit.oak.query.fulltext.FullTextTerm;
-import org.apache.jackrabbit.oak.query.fulltext.FullTextVisitor;
+import org.apache.jackrabbit.oak.spi.query.fulltext.FullTextContains;
+import org.apache.jackrabbit.oak.spi.query.fulltext.FullTextExpression;
+import org.apache.jackrabbit.oak.spi.query.fulltext.FullTextTerm;
+import org.apache.jackrabbit.oak.spi.query.fulltext.FullTextVisitor;
 import org.apache.jackrabbit.oak.spi.query.Cursor;
 import org.apache.jackrabbit.oak.spi.query.Filter;
 import org.apache.jackrabbit.oak.spi.query.Filter.PathRestriction;
@@ -36,8 +36,8 @@ import org.apache.jackrabbit.oak.spi.state.NodeState;
 
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.IndexRule;
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.PropertyRule;
+import static org.apache.jackrabbit.oak.InitialContent.INITIAL_CONTENT;
 import static org.apache.jackrabbit.oak.commons.PathUtils.getParentPath;
-import static org.apache.jackrabbit.oak.plugins.nodetype.write.InitialContent.INITIAL_CONTENT;
 
 class IndexConfigGenerator{
     private QueryEngine queryEngine;

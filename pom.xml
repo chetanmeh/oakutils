@@ -14,7 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <gmaven.version>1.5</gmaven.version>
     <groovy.version>2.4.6</groovy.version>
-    <oak.version>1.5.4</oak.version>
+    <oak.version>1.8.0</oak.version>
   </properties>
 
   <scm>
@@ -28,6 +28,11 @@
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>oak-core</artifactId>
+      <version>${oak.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jackrabbit</groupId>
+      <artifactId>oak-store-document</artifactId>
       <version>${oak.version}</version>
     </dependency>
     <dependency>
