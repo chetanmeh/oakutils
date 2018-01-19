@@ -24,7 +24,6 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.appengine.repackaged.com.google.api.client.util.Lists;
 import org.apache.jackrabbit.oak.plugins.document.Revision;
 import org.apache.jackrabbit.oak.plugins.document.StableRevisionComparator;
 
@@ -56,7 +55,7 @@ public class RevisionFormatter {
 
         List<Revision> revs = new ArrayList<>(revsSet);
         Collections.sort(revs, Collections.reverseOrder(StableRevisionComparator.INSTANCE));
-        List<String> formattedRevStrs = Lists.newArrayListWithCapacity(revs.size());
+        List<String> formattedRevStrs = new ArrayList<>();
         for (Revision r : revs) {
             formattedRevStrs.add(formatRev(r));
         }
