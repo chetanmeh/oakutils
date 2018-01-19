@@ -9,7 +9,8 @@
 
   <properties>
     <appengine.app.version>1-war</appengine.app.version>
-    <appengine.version>1.9.27</appengine.version>
+    <appengine.version>1.9.60</appengine.version>
+    <appengine.maven.plugin>1.3.2</appengine.maven.plugin>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <gmaven.version>1.5</gmaven.version>
     <groovy.version>2.4.6</groovy.version>
@@ -55,12 +56,6 @@
       <version>2.4</version>
     </dependency>
 
-    <!-- Appengine dependencies -->
-    <dependency>
-      <groupId>com.google.appengine</groupId>
-      <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>${appengine.version}</version>
-    </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -103,8 +98,8 @@
         <version>3.1</version>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -153,12 +148,6 @@
       <plugin>
         <groupId>com.google.appengine</groupId>
         <artifactId>appengine-maven-plugin</artifactId>
-        <configuration>
-          <jvmFlags>
-            <jvmFlag>-javaagent:${env.REBEL_HOME}/jrebel.jar</jvmFlag>
-            <jvmFlag>-noverify</jvmFlag>
-          </jvmFlags>
-        </configuration>
       </plugin>
     </plugins>
     <pluginManagement>

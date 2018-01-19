@@ -3,6 +3,7 @@
     <application>oakutils</application>
     <version>${appengine.app.version}</version>
     <threadsafe>true</threadsafe>
+    <runtime>java8</runtime>
 
     <static-files>
         <exclude path="/WEB-INF/**.groovy" />
