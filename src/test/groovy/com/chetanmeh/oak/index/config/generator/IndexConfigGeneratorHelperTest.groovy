@@ -16,6 +16,14 @@ select * from [nt:base] where foo = 'bar\'
     }
 
     @Test
+    public void functionQuery() throws Exception {
+        dumpIndex('''#Paste your queries here
+
+ select * from[dam:Asset] as a where lower(upper(length([jcr:content/mytest])))="mytest" and isdescendantnode(a, \'/content\')
+''')
+    }
+
+    @Test
     public void multipleQueries() throws Exception{
         dumpIndex('''SELECT
   *

@@ -92,6 +92,16 @@ public class IndexDefinitionBuilder {
             return propRule;
         }
 
+        public PropertyRule function(String functionkey, String functionValue){
+            PropertyRule propRule = props.get(functionkey);
+            if (propRule == null){
+                propRule = new PropertyRule(this, createChild(propertiesBuilder, createPropNodeName(functionkey)),
+                        functionValue, "function");
+                props.put(functionkey, propRule);
+            }
+            return propRule;
+        }
+
         private String createPropNodeName(String name) {
             name = getSafePropName(name);
             if (name.isEmpty()){
@@ -113,10 +123,29 @@ public class IndexDefinitionBuilder {
         private final IndexRule indexRule;
         private final NodeBuilder builder;
 
+        /**
+         *
+         * @param indexRule
+         * @param builder
+         * @param name name is the property which need to be indexed. The key for this property is fixed to "name".
+         */
         private PropertyRule(IndexRule indexRule, NodeBuilder builder, String name) {
             this.indexRule = indexRule;
             this.builder = builder;
             builder.setProperty(LuceneIndexConstants.PROP_NAME, name);
+        }
+
+        /**
+         *
+         * @param indexRule
+         * @param builder
+         * @param name name is the property which need to be indexed.
+         * @param nameKey nameKey is the key used in indexdefinition property.
+         */
+        private PropertyRule(IndexRule indexRule, NodeBuilder builder, String name, String nameKey) {
+            this.indexRule = indexRule;
+            this.builder = builder;
+            builder.setProperty(nameKey, name);
         }
 
         public PropertyRule useInExcerpt(){

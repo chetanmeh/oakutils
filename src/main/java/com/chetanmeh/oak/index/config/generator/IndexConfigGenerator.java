@@ -185,7 +185,15 @@ class IndexConfigGenerator{
                 continue;
             }
 
-            PropertyRule propRule = rule.property(pr.propertyName);
+            PropertyRule propRule;
+            if (pr.propertyName.startsWith("function*")) {
+                String functionName = getFunctionName(pr.propertyName);
+                String functionValue = getFunctionValue(pr.propertyName);
+                propRule = rule.function(functionName, functionValue);
+            } else {
+                propRule = rule.property(pr.propertyName);
+            }
+
             if (pr.isNullRestriction()){
                 propRule.nullCheckEnabled();
             } else if (pr.isNotNullRestriction()){
@@ -197,6 +205,49 @@ class IndexConfigGenerator{
         if (filter.getPropertyRestriction(QueryConstants.RESTRICTION_LOCAL_NAME) != null){
             rule.indexNodeName();
         }
+    }
+
+    private String getFunctionName(String function) {
+        return function.replaceAll("[^a-zA-Z]", "");
+    }
+
+    private String getFunctionValue(String functionProperty) {
+        String[] tokens = functionProperty.split("\\*");
+
+        // last property is the property which is to be indexed.
+        String property = tokens[tokens.length - 1];
+        StringBuilder functionPropertyBuilder = new StringBuilder();
+        switch (property) {
+            case "@:localname":
+                functionPropertyBuilder.append("fn:local-name()");
+                break;
+            case "@:name":
+                functionPropertyBuilder.append("fn:name()");
+                break;
+            default:
+                functionPropertyBuilder.append(property);
+        }
+
+        StringBuilder functionValueBuilder = new StringBuilder();
+        for (int i = 1; i <= tokens.length - 2; i++) {
+            switch (tokens[i]) {
+                case "lower":
+                    functionValueBuilder.append("fn:lower-case(");
+                    functionPropertyBuilder.append(")");
+                    break;
+                case "upper":
+                    functionValueBuilder.append("fn:upper-case(");
+                    functionPropertyBuilder.append(")");
+                    break;
+                case "length":
+                    functionValueBuilder.append("fn:string-length(");
+                    functionPropertyBuilder.append(")");
+                    break;
+                default:
+                    throw new RuntimeException("function structure not valid");
+            }
+        }
+        return functionValueBuilder.toString() + functionPropertyBuilder.toString();
     }
 
     private boolean isSpecialRestriction(PropertyRestriction pr) {
