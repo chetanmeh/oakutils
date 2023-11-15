@@ -10,12 +10,16 @@ import javax.jcr.PropertyType;
 import com.chetanmeh.oak.index.config.IndexDefinitionBuilder;
 import com.google.appengine.labs.repackaged.com.google.common.collect.ImmutableList;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
+import org.apache.jackrabbit.oak.InitialContent;
 import org.apache.jackrabbit.oak.api.QueryEngine;
 import org.apache.jackrabbit.oak.api.Root;
 import org.apache.jackrabbit.oak.api.Type;
 import org.apache.jackrabbit.oak.commons.PathUtils;
 import org.apache.jackrabbit.oak.core.ImmutableRoot;
+import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeBuilder;
+import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeStore;
 import org.apache.jackrabbit.oak.query.ExecutionContext;
+import org.apache.jackrabbit.oak.query.NodeStateNodeTypeInfoProvider;
 import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfo;
@@ -32,11 +36,14 @@ import org.apache.jackrabbit.oak.spi.query.QueryConstants;
 import org.apache.jackrabbit.oak.spi.query.QueryIndex;
 import org.apache.jackrabbit.oak.spi.query.QueryIndex.OrderEntry;
 import org.apache.jackrabbit.oak.spi.query.QueryIndexProvider;
+import org.apache.jackrabbit.oak.spi.state.NodeBuilder;
 import org.apache.jackrabbit.oak.spi.state.NodeState;
+import org.apache.jackrabbit.oak.spi.state.PrefetchNodeStore;
 
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.IndexRule;
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.PropertyRule;
-import static org.apache.jackrabbit.oak.InitialContent.INITIAL_CONTENT;
+import static com.chetanmeh.oak.index.config.generator.InitialContentHelper.INITIAL_CONTENT;
+import static org.apache.jackrabbit.oak.InitialContent.DEFAULT;
 import static org.apache.jackrabbit.oak.commons.PathUtils.getParentPath;
 
 class IndexConfigGenerator{
@@ -45,14 +52,15 @@ class IndexConfigGenerator{
     private final Set<String> propsWithFulltextConstraints = Sets.newHashSet();
 
     public IndexConfigGenerator(){
-        final Root root = new ImmutableRoot(INITIAL_CONTENT);
+        NodeBuilder nb = new MemoryNodeBuilder(new MemoryNodeStore().getRoot());
+        final Root root = new ImmutableRoot(nb.getNodeState());
         queryEngine = new QueryEngineImpl() {
             @Override
             protected ExecutionContext getExecutionContext() {
-                return new ExecutionContext(
-                        INITIAL_CONTENT, root,
+                return new ExecutionContext(nb.getBaseState(),
+                        root,
                         new QueryEngineSettings(),
-                        new LuceneIndexGeneratingIndexProvider(), null){
+                        new LuceneIndexGeneratingIndexProvider(), null, PrefetchNodeStore.NOOP){
                     @Override
                     public NodeTypeInfoProvider getNodeTypeInfoProvider() {
                         return DummyNodeTypeInfoProvider.INSTANCE;
