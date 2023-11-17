@@ -2,15 +2,13 @@ package com.chetanmeh.oak.index.config.generator;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
-import javax.jcr.PropertyType;
-
 import com.chetanmeh.oak.index.config.IndexDefinitionBuilder;
-import com.google.appengine.labs.repackaged.com.google.common.collect.ImmutableList;
-import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
-import org.apache.jackrabbit.oak.InitialContent;
+import javax.jcr.PropertyType;
 import org.apache.jackrabbit.oak.api.QueryEngine;
 import org.apache.jackrabbit.oak.api.Root;
 import org.apache.jackrabbit.oak.api.Type;
@@ -19,7 +17,6 @@ import org.apache.jackrabbit.oak.core.ImmutableRoot;
 import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeBuilder;
 import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeStore;
 import org.apache.jackrabbit.oak.query.ExecutionContext;
-import org.apache.jackrabbit.oak.query.NodeStateNodeTypeInfoProvider;
 import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfo;
@@ -42,14 +39,12 @@ import org.apache.jackrabbit.oak.spi.state.PrefetchNodeStore;
 
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.IndexRule;
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.PropertyRule;
-import static com.chetanmeh.oak.index.config.generator.InitialContentHelper.INITIAL_CONTENT;
-import static org.apache.jackrabbit.oak.InitialContent.DEFAULT;
 import static org.apache.jackrabbit.oak.commons.PathUtils.getParentPath;
 
 class IndexConfigGenerator{
     private QueryEngine queryEngine;
     private IndexDefinitionBuilder builder = new IndexDefinitionBuilder();
-    private final Set<String> propsWithFulltextConstraints = Sets.newHashSet();
+    private final Set<String> propsWithFulltextConstraints = new HashSet<>();
 
     public IndexConfigGenerator(){
         NodeBuilder nb = new MemoryNodeBuilder(new MemoryNodeStore().getRoot());
@@ -70,8 +65,28 @@ class IndexConfigGenerator{
         };
     }
 
+    public static boolean isXPath(String query) {
+        // the query is not, at least SQL is not
+        query = query.trim().toLowerCase(Locale.ENGLISH);
+        // explain queries
+        if (query.startsWith("explain")) {
+            query = query.substring("explain".length()).trim();
+            if (query.startsWith("measure")) {
+                query = query.substring("measure".length()).trim();
+            }
+        }
+        // union queries
+        while (query.startsWith("(")) {
+            query = query.substring("(".length()).trim();
+        }
+        if (query.startsWith("select")) {
+            return false;
+        }
+        return true;
+    }
+
     public void process(String statement) throws ParseException {
-        String lang = statement.startsWith("/") ? "xpath" : "JCR-SQL2";
+        String lang = isXPath(statement) ? "xpath" : "JCR-SQL2";
         process(statement, lang);
     }
 
@@ -84,20 +99,27 @@ class IndexConfigGenerator{
     }
 
     private void processFilter(Filter filter, List<OrderEntry> sortOrder) {
-        processPathRestriction(filter);
+        addPathRestrictions(filter);
         IndexRule rule = processNodeTypeConstraint(filter);
         processFulltextConstraints(filter, rule);
         processPropertyRestrictions(filter, rule);
         processSortConditions(sortOrder, rule);
         processPureNodeTypeConstraints(filter, rule);
+    }
 
+    private void addPathRestrictions(Filter filter) {
+        if (!filter.getPath().isEmpty() && !"/".equals(filter.getPath())) {
+            String path = filter.getPath().replaceAll("\\s","");
+            builder.includedPaths(path);
+            builder.queryPaths(path);
+        }
     }
 
     private void processPureNodeTypeConstraints(Filter filter, IndexRule rule) {
         if (filter.getFullTextConstraint() == null
                 && filter.getPropertyRestrictions().isEmpty()
                 && !"nt:base".equals(filter.getNodeType())){
-            rule.property("jcr:primaryType").propertyIndex();
+            rule.property("SHOULD_ADD_PROPERTY_CONSTRAINT");
         }
     }
 
@@ -161,22 +183,22 @@ class IndexConfigGenerator{
         }
 
         for (OrderEntry o : sortOrder){
-            if ("jcr:score".equals(o.getPropertyName())){
-                continue;
-            }
-
             if (o.getPropertyType().isArray()) {
                 continue;
             }
 
             PropertyRule propRule = rule.property(o.getPropertyName());
-
             if (o.getPropertyType() != Type.UNDEFINED){
                 propRule.ordered(PropertyType.nameFromValue(o.getPropertyType().tag()));
             } else {
                 propRule.ordered();
             }
         }
+    }
+
+    private boolean isFunction(String propertyName) {
+        return PolishToQueryConverter.XPATH_FUNCTIONS.stream().anyMatch(propertyName::contains)
+          || PolishToQueryConverter.JCR_SQL2_FUNCTIONS.stream().anyMatch(propertyName::contains);
     }
 
     private void processPropertyRestrictions(Filter filter, IndexRule rule) {
@@ -190,6 +212,15 @@ class IndexConfigGenerator{
             //which are used in fulltext constraint so as to ensure that given
             //property is present. They need not be backed by index
             if (propsWithFulltextConstraints.contains(pr.propertyName)){
+                continue;
+            }
+
+            if (isFunction(pr.propertyName)) {
+                boolean isXPath = filter.getQueryStatement().contains("xpath");
+                String queryFunc = PolishToQueryConverter.apply(pr.propertyName, isXPath);
+                String propertyName = FunctionNameConverter.apply(queryFunc);
+                PropertyRule prop = rule.property(propertyName);
+                prop.function(queryFunc);
                 continue;
             }
 
@@ -234,7 +265,7 @@ class IndexConfigGenerator{
     private class LuceneIndexGeneratingIndexProvider implements QueryIndexProvider{
         @Override
         public List<? extends QueryIndex> getQueryIndexes(NodeState nodeState) {
-            return ImmutableList.of(new LuceneIndexGeneratingIndex());
+            return List.of(new LuceneIndexGeneratingIndex());
         }
     }
 
@@ -310,17 +341,17 @@ class IndexConfigGenerator{
 
         @Override
         public Set<String> getSuperTypes() {
-            return Sets.newHashSet();
+            return new HashSet<>();
         }
 
         @Override
         public Set<String> getPrimarySubTypes() {
-            return Sets.newHashSet();
+            return new HashSet<>();
         }
 
         @Override
         public Set<String> getMixinSubTypes() {
-            return Sets.newHashSet();
+            return new HashSet<>();
         }
 
         @Override
@@ -330,7 +361,7 @@ class IndexConfigGenerator{
 
         @Override
         public Iterable<String> getNamesSingleValuesProperties() {
-            return Sets.newHashSet();
+            return new HashSet<>();
         }
     }
 }

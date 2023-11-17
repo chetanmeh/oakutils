@@ -10,6 +10,7 @@ import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
 import org.apache.jackrabbit.oak.api.Type;
 import org.apache.jackrabbit.oak.commons.PathUtils;
+import org.apache.jackrabbit.oak.plugins.index.IndexConstants;
 import org.apache.jackrabbit.oak.spi.filter.PathFilter;
 import org.apache.jackrabbit.oak.plugins.index.lucene.LuceneIndexConstants;
 import org.apache.jackrabbit.oak.spi.state.NodeBuilder;
@@ -31,6 +32,7 @@ public class IndexDefinitionBuilder {
         builder.setProperty(LuceneIndexConstants.COMPAT_MODE, 2);
         builder.setProperty("async", "async");
         builder.setProperty("type", "lucene");
+        builder.setProperty(LuceneIndexConstants.EVALUATE_PATH_RESTRICTION, true);
         builder.setProperty(JCR_PRIMARYTYPE, "oak:QueryIndexDefinition", Type.NAME);
         indexRule = createChild(builder, LuceneIndexConstants.INDEX_RULES);
     }
@@ -42,6 +44,11 @@ public class IndexDefinitionBuilder {
 
     public IndexDefinitionBuilder includedPaths(String ... paths){
         builder.setProperty(createProperty(PathFilter.PROP_INCLUDED_PATHS, Arrays.asList(paths), Type.STRINGS));
+        return this;
+    }
+
+    public IndexDefinitionBuilder queryPaths(String ... paths){
+        builder.setProperty(createProperty(IndexConstants.QUERY_PATHS, Arrays.asList(paths), Type.STRINGS));
         return this;
     }
 
@@ -85,6 +92,7 @@ public class IndexDefinitionBuilder {
 
         public PropertyRule property(String name){
             PropertyRule propRule = props.get(name);
+            System.out.println("NAME: " + name);
             if (propRule == null){
                 propRule = new PropertyRule(this, createChild(propertiesBuilder, createPropNodeName(name)), name);
                 props.put(name, propRule);
@@ -107,6 +115,26 @@ public class IndexDefinitionBuilder {
         public String getRuleName() {
             return ruleName;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("IndexRule{");
+            sb.append("ruleName='").append(ruleName).append('\'');
+            sb.append(", properties=");
+            if (props.isEmpty()) {
+                sb.append("None");
+            } else {
+                sb.append('[');
+                props.forEach((key, value) -> sb.append(key).append("=").append(value).append(", "));
+                sb.delete(sb.length() - 2, sb.length());  // Remove the trailing comma and space
+                sb.append(']');
+            }
+            sb.append(", indexNodeName=").append(builder.getProperty(LuceneIndexConstants.INDEX_NODE_NAME));
+            sb.append('}');
+            return sb.toString();
+        }
+
     }
 
     public static class PropertyRule {
@@ -159,6 +187,11 @@ public class IndexDefinitionBuilder {
 
         public PropertyRule notNullCheckEnabled(){
             builder.setProperty(LuceneIndexConstants.PROP_NOT_NULL_CHECK_ENABLED, true);
+            return this;
+        }
+
+        public PropertyRule function(String fnName) {
+            builder.setProperty(LuceneIndexConstants.FUNC_NAME, fnName);
             return this;
         }
 
@@ -232,11 +265,13 @@ public class IndexDefinitionBuilder {
         return result;
     }
 
+    // TODO: document examples of this
+    // when the property is like jcr:primaryType or something like this.
     static String getSafePropName(String relativePropName) {
         String propName = PathUtils.getName(relativePropName);
         int indexOfColon = propName.indexOf(':');
         if (indexOfColon > 0){
-            propName = propName.substring(indexOfColon + 1);
+            propName = propName.substring(indexOfColon + 1) + "-REPLACEME";
         }
 
         //Just keep ascii chars
