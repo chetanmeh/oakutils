@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PolishToQueryConverterTest {
 
+  // taken from: https://github.com/apache/jackrabbit-oak/blob/trunk/oak-search/src/test/java/org/apache/jackrabbit/oak/plugins/index/search/util/FunctionIndexProcessorTest.java
   @Test
   public void testXPath() {
     checkConvert(

@@ -216,7 +216,10 @@ class IndexConfigGenerator{
             }
 
             if (isFunction(pr.propertyName)) {
-                boolean isXPath = filter.getQueryStatement().contains("xpath");
+                // this is only a heuristic to detect if the original query was XPath. It is not 100% accurate as a
+                // JCR-SQL2 query might contain a condition with this String literal. But in most cases, this should
+                // correctly detect it.
+                boolean isXPath = filter.getQueryStatement().contains("/* xpath");
                 String queryFunc = PolishToQueryConverter.apply(pr.propertyName, isXPath);
                 String propertyName = FunctionNameConverter.apply(queryFunc);
                 PropertyRule prop = rule.property(propertyName);
