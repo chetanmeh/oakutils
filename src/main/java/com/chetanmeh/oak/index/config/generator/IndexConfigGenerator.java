@@ -196,9 +196,14 @@ class IndexConfigGenerator{
         }
     }
 
+
+    /**
+     * Returns if the propertyName is a function. If it is, it will always be in Polish notation.
+     * @param propertyName the propertyName in a propertyRestriction
+     * @return true if it is a function and false otherwise.
+     */
     private boolean isFunction(String propertyName) {
-        return PolishToQueryConverter.XPATH_FUNCTIONS.stream().anyMatch(propertyName::contains)
-          || PolishToQueryConverter.JCR_SQL2_FUNCTIONS.stream().anyMatch(propertyName::contains);
+        return propertyName.startsWith("function*");
     }
 
     private void processPropertyRestrictions(Filter filter, IndexRule rule) {

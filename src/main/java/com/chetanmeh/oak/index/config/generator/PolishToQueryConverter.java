@@ -7,11 +7,6 @@ import java.util.Set;
 
 public class PolishToQueryConverter {
 
-    public final static Set<String> XPATH_FUNCTIONS = Set.of("fn:local-name()", "fn:name()",
-        "fn:path()", "fn:upper-case", "fn:lower-case", "fn:coalesce", "fn:string-length");
-    public final static Set<String> JCR_SQL2_FUNCTIONS = Set.of("localname()", "name()", "path()",
-        "upper", "lower", "coalesce", "first", "length");
-
     /**
      * Converts a given Polish notation string to either XPath or JCR-SQL2 syntax based on the
      * specified flag.
@@ -23,6 +18,8 @@ public class PolishToQueryConverter {
      */
     public static String apply(String polishNotation, boolean isXPath) {
         Deque<String> tokens = new LinkedList<>(Arrays.asList(polishNotation.split("\\*")));
+        // the first one is always "function" which we will skip
+        tokens.poll();
         return parseTokens(tokens, isXPath);
     }
 
@@ -42,10 +39,6 @@ public class PolishToQueryConverter {
         }
 
         String token = tokens.poll();
-        if ("function".equals(token)) {
-            return parseTokens(tokens, isXPath);
-        }
-
         String fn;
 
         switch (token) {
