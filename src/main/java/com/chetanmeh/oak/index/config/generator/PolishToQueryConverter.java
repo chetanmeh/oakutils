@@ -2,20 +2,23 @@ package com.chetanmeh.oak.index.config.generator;
 
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 public class PolishToQueryConverter {
-    public final static Set<String> XPATH_FUNCTIONS = Set.of("fn:local-name()", "fn:name()", "fn:path()", "fn:upper-case", "fn:lower-case", "fn:coalesce", "fn:string-length");
-    public final static Set<String> JCR_SQL2_FUNCTIONS = Set.of("localname()", "name()", "path()", "upper", "lower", "coalesce", "first", "length");
+
+    public final static Set<String> XPATH_FUNCTIONS = Set.of("fn:local-name()", "fn:name()",
+        "fn:path()", "fn:upper-case", "fn:lower-case", "fn:coalesce", "fn:string-length");
+    public final static Set<String> JCR_SQL2_FUNCTIONS = Set.of("localname()", "name()", "path()",
+        "upper", "lower", "coalesce", "first", "length");
 
     /**
-     * Converts a given Polish notation string to either XPath or JCR-SQL2 syntax based on the specified flag.
+     * Converts a given Polish notation string to either XPath or JCR-SQL2 syntax based on the
+     * specified flag.
      *
      * @param polishNotation The Polish notation string to be converted.
-     * @param isXPath A boolean flag indicating whether to convert to XPath (true) or JCR-SQL2 (false) syntax.
+     * @param isXPath        A boolean flag indicating whether to convert to XPath (true) or
+     *                       JCR-SQL2 (false) syntax.
      * @return A string representing the converted query in either XPath or JCR-SQL2 syntax.
      */
     public static String apply(String polishNotation, boolean isXPath) {
@@ -24,12 +27,13 @@ public class PolishToQueryConverter {
     }
 
     /**
-     * Recursively parses tokens from a deque representing a Polish notation expression and converts them into
-     * either XPath or JCR-SQL2 query syntax. We use a deque, as we can tokenize each part of the expression as they are
-     * separated by "*".
+     * Recursively parses tokens from a deque representing a Polish notation expression and converts
+     * them into either XPath or JCR-SQL2 query syntax. We use a deque, as we can tokenize each part
+     * of the expression as they are separated by "*".
      *
-     * @param tokens A deque of tokens derived from the Polish notation expression.
-     * @param isXPath A boolean flag indicating whether to convert to XPath (true) or JCR-SQL2 (false) syntax.
+     * @param tokens  A deque of tokens derived from the Polish notation expression.
+     * @param isXPath A boolean flag indicating whether to convert to XPath (true) or JCR-SQL2
+     *                (false) syntax.
      * @return A string representing the converted part of the query in the appropriate syntax.
      */
     private static String parseTokens(Deque<String> tokens, boolean isXPath) {
@@ -83,10 +87,11 @@ public class PolishToQueryConverter {
     }
 
     /**
-     * This method formats properties from Polish notation to valid XPath. The property tokens are always prefixed with
-     * "@". Since the token might contain a "/", meaning a nested property, we need to format it to a valid XPath which means that the "deepest" child needs to be prefixed with "@" instead.
-     * Example:
-     * "@jcr:content/foo/bar/property1" to "jcr:content/foo/bar/@property1".
+     * This method formats properties from Polish notation to valid XPath. The property tokens are
+     * always prefixed with "@". Since the token might contain a "/", meaning a nested property, we
+     * need to format it to a valid XPath which means that the "deepest" child needs to be prefixed
+     * with "@" instead. Example: "@jcr:content/foo/bar/property1" to
+     * "jcr:content/foo/bar/@property1".
      *
      * @param token The property token in Polish notation.
      * @return The valid XPath formatted property.
