@@ -92,7 +92,6 @@ public class IndexDefinitionBuilder {
 
         public PropertyRule property(String name){
             PropertyRule propRule = props.get(name);
-            System.out.println("NAME: " + name);
             if (propRule == null){
                 propRule = new PropertyRule(this, createChild(propertiesBuilder, createPropNodeName(name)), name);
                 props.put(name, propRule);
