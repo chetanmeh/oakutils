@@ -1,65 +1,96 @@
 package com.chetanmeh.oak.index.config.generator;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
 
 public class FunctionNameConverter {
-  public final static List<String> functionNames = List.of("local-name", "name", "path", "upper-case", "lower-case",
-    "coalesce", "first", "string-length");
 
-  public static String apply(String functionPattern) {
-    String functionName = extractFunctionName(functionPattern);
-    String propertyName = extractPropertyName(functionPattern);
-    propertyName = propertyName.substring(propertyName.indexOf(':') + 1);
+    /**
+     * Converts a given function pattern in polish notation into a string in camelCase. This is used
+     * to generate node names from the query. For example, the function pattern
+     * "function*upper*@data" will be converted to "upperData".
+     *
+     * @param functionPattern The string pattern representing a function. It is split into tokens
+     *                        based on the '*' character.
+     * @return A string combining the function name(s) and properties in camelCase.
+     */
+    public static String apply(String functionPattern) {
+        Deque<String> tokens = new LinkedList<>(Arrays.asList(functionPattern.split("\\*")));
+        if ("function".equals(tokens.peek())) {
+            tokens.poll();
+        }
 
-    return toCamelCase(functionName, false) + toCamelCase(propertyName, true);
-  }
+        String converted = parseTokens(tokens);
 
-  private static String extractFunctionName(String input) {
-    return functionNames.stream().filter(input::contains).findFirst().orElse("");
-  }
-
-  private static String extractPropertyName(String input) {
-    int start = input.indexOf('@');
-    int end = input.indexOf(')');
-    if (start != -1 && end != -1 && start < end) {
-      return input.substring(start + 1, end);
-    }
-    return "";
-  }
-
-  private static String toCamelCase(String functionName, boolean capitalizeFirst) {
-    StringBuilder result = new StringBuilder();
-    boolean capitalize = capitalizeFirst;
-
-    for (char c : functionName.toCharArray()) {
-      if (c == ':' || c == '-') {
-        capitalize = true;
-      } else if (capitalize) {
-        result.append(Character.toUpperCase(c));
-        capitalize = false;
-      } else {
-        result.append(Character.toLowerCase(c));
-      }
+        // lowercase the first letter
+        return converted.substring(0, 1).toLowerCase() + converted.substring(1);
     }
 
-    return result.toString();
-  }
+    private static String parseTokens(Deque<String> tokens) {
+        if (tokens.isEmpty()) {
+            return "";
+        }
 
-  public static void main(String[] args) {
-    String example = "fn:lower-case(@jcr:title)";
-    String converted = apply(example);
-    System.out.println(converted); // Output: lowerCaseTitle
+        String token = tokens.poll();
 
-    String anotherExample = "fn:upper-case(@content:type)";
-    String anotherConverted = apply(anotherExample);
-    System.out.println(anotherConverted); // Output: upperCaseContentType
+        switch (token) {
+            case "upper":
+            case "lower":
+            case "first":
+            case "length":
+            case "@:localname":
+            case "@:name":
+            case "@:path":
+                return capitalize(token) + parseTokens(tokens);
+            case "coalesce":
+                return capitalize(token) + parseTokens(tokens) + parseTokens(tokens);
+            default:
+                return capitalize(extractPropertyName(token));
+        }
+    }
 
-    String localNameExample = "fn:local-name(@jcr:data)";
-    String localNameConverted = apply(localNameExample);
-    System.out.println(localNameConverted); // Output: localNameData
+    /**
+     * Capitalizes the first letter of the given string. If the string starts with a special prefix
+     * "@:", this prefix is removed before capitalization. If the string is null or empty, it is
+     * returned as is.
+     *
+     * @param str The string to be capitalized.
+     * @return The capitalized string, or as is if it is null or empty.
+     */
+    private static String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        // Remove "@:" prefix if present
+        if (str.startsWith("@:")) {
+            str = str.substring(2);
+        }
 
-    String jcrPath = "jcr:first(@jcr:data)";
-    String jcrPathName = apply(jcrPath);
-    System.out.println(jcrPathName); // Output: localNameData
-  }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    /**
+     * Extracts the property name from string. The property name is assumed to start with a '@'. If
+     * that is the case and the string contains characters like ':' and/or '/' we need to handle that.
+     * For example:
+     *
+     * "@jcr:content/foo2" -> "foo2"
+     *
+     * @param input The input string containing the property name.
+     * @return The extracted property name.
+     */
+    private static String extractPropertyName(String input) {
+        if (input.contains("/")) {
+            int slash = input.lastIndexOf("/");
+            return input.charAt(slash + 1) + input.substring(slash + 2);
+        }
+
+        if (input.contains(":")) {
+            int colon = input.lastIndexOf(":");
+            return input.charAt(colon + 1) + input.substring(colon + 2);
+        }
+
+        return input.substring(1);
+    }
 }

@@ -226,7 +226,7 @@ class IndexConfigGenerator{
                 // correctly detect it.
                 boolean isXPath = filter.getQueryStatement().contains("/* xpath");
                 String queryFunc = PolishToQueryConverter.apply(pr.propertyName, isXPath);
-                String propertyName = FunctionNameConverter.apply(queryFunc);
+                String propertyName = FunctionNameConverter.apply(pr.propertyName);
                 PropertyRule prop = rule.property(propertyName);
                 prop.function(queryFunc);
                 continue;
