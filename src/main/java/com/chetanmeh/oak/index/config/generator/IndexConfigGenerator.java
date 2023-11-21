@@ -224,11 +224,12 @@ class IndexConfigGenerator {
      * @param query the query statement
      * @return true if the query was originally XPath and false otherwise.
      */
-    public boolean isOriginallyXPath(String query) {
-        return query.contains("/* xpath");
+    public static boolean isOriginallyXPath(String query) {
+        return query.contains("/* xpath: ") && query.endsWith(" */");
     }
 
     private void processPropertyRestrictions(Filter filter, IndexRule rule) {
+        System.out.println(filter.getQueryStatement());
         for (PropertyRestriction pr : filter.getPropertyRestrictions()) {
             //Ignore special restrictions
             if (isSpecialRestriction(pr)) {
@@ -243,10 +244,9 @@ class IndexConfigGenerator {
             }
 
             if (isFunction(pr.propertyName)) {
-
-                boolean isXPath = isXPath(filter.getQueryStatement());
+                boolean isXPath = isOriginallyXPath(filter.getQueryStatement());
                 String queryFunc = PolishToQueryConverter.apply(pr.propertyName, isXPath);
-                String propertyName = FunctionNameConverter.apply(pr.propertyName);
+                String propertyName = FunctionNameConverter.apply(pr.propertyName, isXPath);
                 PropertyRule prop = rule.property(propertyName);
                 prop.function(queryFunc);
                 continue;

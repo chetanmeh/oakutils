@@ -3,8 +3,20 @@ package com.chetanmeh.oak.index.config.generator;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class FunctionNameConverter {
+
+    private final static Map<String, String> XPATH_NAMES = Map.of(
+        "upper", "upperCase",
+        "lower", "lowerCase",
+        "coalesce", "coalesce",
+        "first", "first",
+        "length", "stringLength",
+        "@:localname", "localName",
+        "@:name", "name",
+        "@:path", "path"
+    );
 
     /**
      * Converts a given function pattern in polish notation into a string in camelCase. This is used
@@ -15,29 +27,32 @@ public class FunctionNameConverter {
      *                        based on the '*' character.
      * @return A string combining the function name(s) and properties in camelCase.
      */
-    public static String apply(String functionPattern) {
+    public static String apply(String functionPattern, boolean isXPath) {
         Deque<String> tokens = new LinkedList<>(Arrays.asList(functionPattern.split("\\*")));
         if ("function".equals(tokens.peek())) {
             tokens.poll();
         }
 
-        String converted = parseTokens(tokens);
+        String converted = parseTokens(tokens, isXPath);
 
         // lowercase the first letter
         return converted.substring(0, 1).toLowerCase() + converted.substring(1);
     }
 
-    private static String parseTokens(Deque<String> tokens) {
+    private static String parseTokens(Deque<String> tokens, boolean isXPath) {
         if (tokens.isEmpty()) {
             return "";
         }
 
         String token = tokens.poll();
-
+        String fn;
         return switch (token) {
-            case "upper", "lower", "first", "length", "@:localname", "@:name", "@:path" ->
-                capitalize(token) + parseTokens(tokens);
-            case "coalesce" -> capitalize(token) + parseTokens(tokens) + parseTokens(tokens);
+            case "upper", "lower", "first", "length", "@:localname", "@:name", "@:path" -> {
+                fn = isXPath ? capitalize(XPATH_NAMES.get(token)) : capitalize(token);
+                yield fn + parseTokens(tokens, isXPath);
+            }
+            case "coalesce" ->
+                capitalize(token) + parseTokens(tokens, isXPath) + parseTokens(tokens, isXPath);
             default -> capitalize(extractPropertyName(token));
         };
     }
@@ -64,9 +79,9 @@ public class FunctionNameConverter {
 
     /**
      * Extracts the property name from string. The property name is assumed to start with a '@'. If
-     * that is the case and the string contains characters like ':' and/or '/' we need to handle that.
-     * For example:
-     *
+     * that is the case and the string contains characters like ':' and/or '/' we need to handle
+     * that. For example:
+     * <p>
      * "@jcr:content/foo2" -> "foo2"
      *
      * @param input The input string containing the property name.
