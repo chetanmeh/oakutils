@@ -4,7 +4,6 @@ import com.chetanmeh.oak.state.export.NodeStateExporter
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions
 
 
 class IndexConfigGeneratorTest {
@@ -54,13 +53,13 @@ class IndexConfigGeneratorTest {
     void testPathRestrictions() throws Exception {
         processQuery("/jcr:root/content");
         String res = NodeStateExporter.toCND(generator.indexConfig);
-        Assertions.assertTrue(res.contains("includedPaths = [/content]"))
-        Assertions.assertTrue(res.contains("queryPaths = [/content]"))
+        assert res.contains("includedPaths = [/content]")
+        assert res.contains("queryPaths = [/content]")
 
         processQuery("select * from [nt:base] where isdescendantnode('/content/dam')")
         res = NodeStateExporter.toCND(generator.indexConfig);
-        Assertions.assertTrue(res.contains("includedPaths = [/content/dam]"))
-        Assertions.assertTrue(res.contains("queryPaths = [/content/dam]"))
+        assert res.contains("includedPaths = [/content/dam]")
+        assert res.contains("queryPaths = [/content/dam]")
     }
 
     @Test
@@ -72,8 +71,8 @@ class IndexConfigGeneratorTest {
                 """
         )
         String res = NodeStateExporter.toCND(generator.indexConfig)
-        Assertions.assertTrue(res.contains("includedPaths = [/content/wknd]"))
-        Assertions.assertTrue(res.contains("functionName = \"lower([jcr:title])\""))
+        assert res.contains("includedPaths = [/content/wknd]")
+        assert res.contains("functionName = \"lower([jcr:title])\"")
     }
 
     @Test
@@ -89,13 +88,13 @@ class IndexConfigGeneratorTest {
     @Test
     void testLowerCase() {
         processQuery("""/jcr:root/content/wknd// element(*, cq:Page) [fn:lower-case(@jcr:title) = 'france']""")
-        Assertions.assertTrue(indexConfigHasNode("cq:Page", "lowerCaseTitle"))
+        assert indexConfigHasNode("cq:Page", "lowerCaseTitle")
     }
 
     @Test
     void testXPathCategorizer() {
         String query = "select [jcr:path], [jcr:score], * from [nt:base] as a where issamenode(a, '/content') /* xpath: /jcr:root/content */"
-        Assertions.assertTrue(IndexConfigGenerator.isOriginallyXPath(query))
+        assert IndexConfigGenerator.isOriginallyXPath(query)
     }
 
 
@@ -108,6 +107,6 @@ class IndexConfigGeneratorTest {
                 .getChildNode("indexRules")
                 .getChildNode(child)
                 .getChildNode("properties")
-                .hasChildNode(property)
+                .getChildNode(property).exists()
     }
 }
