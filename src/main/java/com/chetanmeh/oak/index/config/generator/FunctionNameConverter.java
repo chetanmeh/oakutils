@@ -51,6 +51,10 @@ public class FunctionNameConverter {
         String fn;
 
         return switch (token) {
+            // All function names are capitalized as we want the node name to be camelCase. The only
+            // exception is the starting function. However, in this function, we "naively"
+            // capitalize all functions and handle the exception the in the apply method as this is
+            // easier.
             case "upper", "lower", "first", "length", "@:localname", "@:name", "@:path" -> {
                 fn = isXPath ? capitalize(XPATH_NAMES.get(token)) : capitalize(token);
                 yield fn + parse(tokens, isXPath);
