@@ -42,32 +42,34 @@ public class PolishToQueryConverter {
         String token = tokens.poll();
         String fn;
 
-        switch (token) {
-            case "upper":
+        return switch (token) {
+            case "upper" -> {
                 fn = isXPath ? "fn:upper-case(" : "upper(";
-                return fn + parseTokens(tokens, isXPath) + ")";
-            case "lower":
+                yield fn + parseTokens(tokens, isXPath) + ")";
+            }
+            case "lower" -> {
                 fn = isXPath ? "fn:lower-case(" : "lower(";
-                return fn + parseTokens(tokens, isXPath) + ")";
-            case "coalesce":
+                yield fn + parseTokens(tokens, isXPath) + ")";
+            }
+            case "coalesce" -> {
                 fn = isXPath ? "fn:coalesce(" : "coalesce(";
-                return fn + parseTokens(tokens, isXPath) + "," + parseTokens(tokens, isXPath) + ")";
-            case "first":
+                yield fn + parseTokens(tokens, isXPath) + "," + parseTokens(tokens, isXPath) + ")";
+            }
+            case "first" -> {
                 fn = isXPath ? "jcr:first(" : "first(";
-                return fn + parseTokens(tokens, isXPath) + ")";
-            case "length":
+                yield fn + parseTokens(tokens, isXPath) + ")";
+            }
+            case "length" -> {
                 fn = isXPath ? "fn:string-length(" : "length(";
-                return fn + parseTokens(tokens, isXPath) + ")";
-            case "@:localname":
-                return isXPath ? "fn:local-name()" : "localname()";
-            case "@:name":
-                return isXPath ? "fn:name()" : "name()";
-            case "@:path":
-                return isXPath ? "fn:path()" : "path()";
-            default:
+                yield fn + parseTokens(tokens, isXPath) + ")";
+            }
+            case "@:localname" -> isXPath ? "fn:local-name()" : "localname()";
+            case "@:name" -> isXPath ? "fn:name()" : "name()";
+            case "@:path" -> isXPath ? "fn:path()" : "path()";
+            default ->
                 // Handle properties
-                return isXPath ? formatXPathProperty(token) : formatSQL2Property(token);
-        }
+                isXPath ? formatXPathProperty(token) : formatSQL2Property(token);
+        };
     }
 
     /*

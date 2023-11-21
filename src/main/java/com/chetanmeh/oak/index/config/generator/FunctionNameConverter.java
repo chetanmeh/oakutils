@@ -34,20 +34,12 @@ public class FunctionNameConverter {
 
         String token = tokens.poll();
 
-        switch (token) {
-            case "upper":
-            case "lower":
-            case "first":
-            case "length":
-            case "@:localname":
-            case "@:name":
-            case "@:path":
-                return capitalize(token) + parseTokens(tokens);
-            case "coalesce":
-                return capitalize(token) + parseTokens(tokens) + parseTokens(tokens);
-            default:
-                return capitalize(extractPropertyName(token));
-        }
+        return switch (token) {
+            case "upper", "lower", "first", "length", "@:localname", "@:name", "@:path" ->
+                capitalize(token) + parseTokens(tokens);
+            case "coalesce" -> capitalize(token) + parseTokens(tokens) + parseTokens(tokens);
+            default -> capitalize(extractPropertyName(token));
+        };
     }
 
     /**
