@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import com.chetanmeh.oak.index.config.IndexDefinitionBuilder;
@@ -19,6 +18,7 @@ import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeStore;
 import org.apache.jackrabbit.oak.query.ExecutionContext;
 import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
+import org.apache.jackrabbit.oak.query.QueryFormatter;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfo;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfoProvider;
 import org.apache.jackrabbit.oak.spi.query.fulltext.FullTextContains;
@@ -66,28 +66,8 @@ class IndexConfigGenerator {
         };
     }
 
-    public static boolean isXPath(String query) {
-        // the query is not, at least SQL is not
-        query = query.trim().toLowerCase(Locale.ENGLISH);
-        // explain queries
-        if (query.startsWith("explain")) {
-            query = query.substring("explain".length()).trim();
-            if (query.startsWith("measure")) {
-                query = query.substring("measure".length()).trim();
-            }
-        }
-        // union queries
-        while (query.startsWith("(")) {
-            query = query.substring("(".length()).trim();
-        }
-        if (query.startsWith("select")) {
-            return false;
-        }
-        return true;
-    }
-
     public void process(String statement) throws ParseException {
-        String lang = isXPath(statement) ? "xpath" : "JCR-SQL2";
+        String lang = QueryFormatter.isXPath(statement, null) ? "xpath" : "JCR-SQL2";
         process(statement, lang);
     }
 

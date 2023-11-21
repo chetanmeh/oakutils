@@ -14,7 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <gmaven.version>1.5</gmaven.version>
     <groovy.version>2.4.6</groovy.version>
-    <oak.version>1.58.0</oak.version>
+    <oak.version>1.58-T20231114150403-d28e5b3</oak.version>
   </properties>
 
   <scm>
