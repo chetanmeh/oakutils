@@ -52,7 +52,7 @@ public class FunctionNameConverter {
 
         return switch (token) {
             case "upper", "lower", "first", "length", "@:localname", "@:name", "@:path" -> {
-                fn = isXPath ? XPATH_NAMES.get(token) : capitalize(token);
+                fn = isXPath ? capitalize(XPATH_NAMES.get(token)) : capitalize(token);
                 yield fn + parse(tokens, isXPath);
             }
             case "coalesce" -> capitalize(token) + parse(tokens, isXPath) + parse(tokens, isXPath);

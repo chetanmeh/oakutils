@@ -32,7 +32,7 @@ public class FunctionNameConverterTest {
         checkConvert("function*upper*@data", "upperCaseData", true);
         checkConvert("function*lower*@test/data", "lowerCaseData", true);
         checkConvert("function*lower*@:name", "lowerCaseName", true);
-        checkConvert("function*lower*@:localname", "lowerCaseLocalName", true);
+        checkConvert("function*lower*@:localname", "lowerCaseLocalname", true);
         checkConvert("function*length*@test/data", "stringLengthData", true);
         checkConvert("function*length*@:name", "stringLengthName", true);
         checkConvert("function*@:path", "path", true);
