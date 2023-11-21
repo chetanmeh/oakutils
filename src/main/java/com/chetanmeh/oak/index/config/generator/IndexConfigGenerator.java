@@ -41,21 +41,22 @@ import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.IndexRule;
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.PropertyRule;
 import static org.apache.jackrabbit.oak.commons.PathUtils.getParentPath;
 
-class IndexConfigGenerator{
+class IndexConfigGenerator {
+
     private QueryEngine queryEngine;
     private IndexDefinitionBuilder builder = new IndexDefinitionBuilder();
     private final Set<String> propsWithFulltextConstraints = new HashSet<>();
 
-    public IndexConfigGenerator(){
+    public IndexConfigGenerator() {
         NodeBuilder nb = new MemoryNodeBuilder(new MemoryNodeStore().getRoot());
         final Root root = new ImmutableRoot(nb.getNodeState());
         queryEngine = new QueryEngineImpl() {
             @Override
             protected ExecutionContext getExecutionContext() {
                 return new ExecutionContext(nb.getBaseState(),
-                        root,
-                        new QueryEngineSettings(),
-                        new LuceneIndexGeneratingIndexProvider(), null, PrefetchNodeStore.NOOP){
+                    root,
+                    new QueryEngineSettings(),
+                    new LuceneIndexGeneratingIndexProvider(), null, PrefetchNodeStore.NOOP) {
                     @Override
                     public NodeTypeInfoProvider getNodeTypeInfoProvider() {
                         return DummyNodeTypeInfoProvider.INSTANCE;
@@ -94,7 +95,7 @@ class IndexConfigGenerator{
         queryEngine.executeQuery(statement, language, null, null);
     }
 
-    public NodeState getIndexConfig(){
+    public NodeState getIndexConfig() {
         return builder.build();
     }
 
@@ -109,7 +110,7 @@ class IndexConfigGenerator{
 
     private void addPathRestrictions(Filter filter) {
         if (!filter.getPath().isEmpty() && !"/".equals(filter.getPath())) {
-            String path = filter.getPath().replaceAll("\\s","");
+            String path = filter.getPath().replaceAll("\\s", "");
             builder.includedPaths(path);
             builder.queryPaths(path);
         }
@@ -117,15 +118,15 @@ class IndexConfigGenerator{
 
     private void processPureNodeTypeConstraints(Filter filter, IndexRule rule) {
         if (filter.getFullTextConstraint() == null
-                && filter.getPropertyRestrictions().isEmpty()
-                && !"nt:base".equals(filter.getNodeType())){
+            && filter.getPropertyRestrictions().isEmpty()
+            && !"nt:base".equals(filter.getNodeType())) {
             rule.property("SHOULD_ADD_PROPERTY_CONSTRAINT");
         }
     }
 
     private void processFulltextConstraints(Filter filter, final IndexRule rule) {
         FullTextExpression ft = filter.getFullTextConstraint();
-        if (ft == null){
+        if (ft == null) {
             return;
         }
 
@@ -146,19 +147,19 @@ class IndexConfigGenerator{
                 String p = propertyName;
                 String propertyPath = null;
                 String nodePath = null;
-                if (p == null){
+                if (p == null) {
                     return;
                 }
                 String parent = getParentPath(p);
-                if (isNodePath(p)){
+                if (isNodePath(p)) {
                     nodePath = parent;
                 } else {
                     propertyPath = p;
                 }
 
-                if (nodePath != null){
+                if (nodePath != null) {
                     builder.aggregateRule(rule.getRuleName()).include(nodePath).relativeNode();
-                } else if (propertyPath != null){
+                } else if (propertyPath != null) {
                     rule.property(propertyPath).analyzed();
                     propsWithFulltextConstraints.add(propertyPath);
                 }
@@ -167,9 +168,8 @@ class IndexConfigGenerator{
     }
 
     /**
-     * In a fulltext term for jcr:contains(foo, 'bar') 'foo'
-     * is the property name. While in jcr:contains(foo/*, 'bar')
-     * 'foo' is node name
+     * In a fulltext term for jcr:contains(foo, 'bar') 'foo' is the property name. While in
+     * jcr:contains(foo/*, 'bar') 'foo' is node name
      *
      * @return true if the term is related to node
      */
@@ -178,17 +178,21 @@ class IndexConfigGenerator{
     }
 
     private void processSortConditions(List<OrderEntry> sortOrder, IndexRule rule) {
-        if (sortOrder == null){
+        if (sortOrder == null) {
             return;
         }
 
-        for (OrderEntry o : sortOrder){
+        for (OrderEntry o : sortOrder) {
+            if ("jcr:score".equals(o.getPropertyName())) {
+                continue;
+            }
+
             if (o.getPropertyType().isArray()) {
                 continue;
             }
 
             PropertyRule propRule = rule.property(o.getPropertyName());
-            if (o.getPropertyType() != Type.UNDEFINED){
+            if (o.getPropertyType() != Type.UNDEFINED) {
                 propRule.ordered(PropertyType.nameFromValue(o.getPropertyType().tag()));
             } else {
                 propRule.ordered();
@@ -199,6 +203,7 @@ class IndexConfigGenerator{
 
     /**
      * Returns if the propertyName is a function. If it is, it will be in Polish notation.
+     *
      * @param propertyName the propertyName in a propertyRestriction
      * @return true if it is a function and false otherwise.
      */
@@ -206,25 +211,40 @@ class IndexConfigGenerator{
         return propertyName.startsWith("function*");
     }
 
+
+    /**
+     * Returns if the query originally was written in XPath. When the query engine creates the
+     * filter, the query statement is automatically SQL-2. But if it was originally XPath, it
+     * contains a comment with the original XPath query.
+     * <p>
+     * Detecting it like this is only a heuristic. It is not 100% accurate as a JCR-SQL2 query might
+     * contain a condition with this String literal. But in most cases, this should correctly detect
+     * it.
+     *
+     * @param filter the filter
+     * @return true if the query was originally XPath and false otherwise.
+     */
+    public boolean isXPath(Filter filter) {
+        return filter.getQueryStatement().contains("/* xpath");
+    }
+
     private void processPropertyRestrictions(Filter filter, IndexRule rule) {
-        for (PropertyRestriction pr : filter.getPropertyRestrictions()){
+        for (PropertyRestriction pr : filter.getPropertyRestrictions()) {
             //Ignore special restrictions
-            if (isSpecialRestriction(pr)){
+            if (isSpecialRestriction(pr)) {
                 continue;
             }
 
             //QueryEngine adds a synthetic constraint for those properties
             //which are used in fulltext constraint so as to ensure that given
             //property is present. They need not be backed by index
-            if (propsWithFulltextConstraints.contains(pr.propertyName)){
+            if (propsWithFulltextConstraints.contains(pr.propertyName)) {
                 continue;
             }
 
             if (isFunction(pr.propertyName)) {
-                // this is only a heuristic to detect if the original query was XPath. It is not 100% accurate as a
-                // JCR-SQL2 query might contain a condition with this String literal. But in most cases, this should
-                // correctly detect it.
-                boolean isXPath = filter.getQueryStatement().contains("/* xpath");
+
+                boolean isXPath = isXPath(filter);
                 String queryFunc = PolishToQueryConverter.apply(pr.propertyName, isXPath);
                 String propertyName = FunctionNameConverter.apply(pr.propertyName);
                 PropertyRule prop = rule.property(propertyName);
@@ -233,25 +253,25 @@ class IndexConfigGenerator{
             }
 
             PropertyRule propRule = rule.property(pr.propertyName);
-            if (pr.isNullRestriction()){
+            if (pr.isNullRestriction()) {
                 propRule.nullCheckEnabled();
-            } else if (pr.isNotNullRestriction()){
+            } else if (pr.isNotNullRestriction()) {
                 propRule.notNullCheckEnabled();
             }
             propRule.propertyIndex();
         }
 
-        if (filter.getPropertyRestriction(QueryConstants.RESTRICTION_LOCAL_NAME) != null){
+        if (filter.getPropertyRestriction(QueryConstants.RESTRICTION_LOCAL_NAME) != null) {
             rule.indexNodeName();
         }
     }
 
     private boolean isSpecialRestriction(PropertyRestriction pr) {
         String name = pr.propertyName;
-        if (name.startsWith(":")){
+        if (name.startsWith(":")) {
             return true;
         }
-        if (name.startsWith("native*")){
+        if (name.startsWith("native*")) {
             return true;
         }
         return false;
@@ -259,9 +279,9 @@ class IndexConfigGenerator{
 
     private void processPathRestriction(Filter filter) {
         if (filter.getPathRestriction() != PathRestriction.NO_RESTRICTION
-                || (filter.getPathRestriction() == PathRestriction.ALL_CHILDREN
-                        && !PathUtils.denotesRoot(filter.getPath()))
-                ){
+            || (filter.getPathRestriction() == PathRestriction.ALL_CHILDREN
+            && !PathUtils.denotesRoot(filter.getPath()))
+        ) {
             builder.evaluatePathRestrictions();
         }
     }
@@ -270,7 +290,8 @@ class IndexConfigGenerator{
         return builder.indexRule(filter.getNodeType());
     }
 
-    private class LuceneIndexGeneratingIndexProvider implements QueryIndexProvider{
+    private class LuceneIndexGeneratingIndexProvider implements QueryIndexProvider {
+
         @Override
         public List<? extends QueryIndex> getQueryIndexes(NodeState nodeState) {
             return List.of(new LuceneIndexGeneratingIndex());
@@ -278,6 +299,7 @@ class IndexConfigGenerator{
     }
 
     private class LuceneIndexGeneratingIndex implements QueryIndex.AdvancedQueryIndex, QueryIndex {
+
         @Override
         public double getMinimumCost() {
             return 1.0;
@@ -305,7 +327,7 @@ class IndexConfigGenerator{
 
         @Override
         public List<QueryIndex.IndexPlan> getPlans(Filter filter,
-                                                   List<OrderEntry> sortOrder, NodeState rootState) {
+            List<OrderEntry> sortOrder, NodeState rootState) {
             processFilter(filter, sortOrder);
             return Collections.emptyList();
         }
@@ -331,6 +353,7 @@ class IndexConfigGenerator{
     }
 
     private static class DummyNodeTypeInfo implements NodeTypeInfo {
+
         private final String nodeTypeName;
 
         private DummyNodeTypeInfo(String nodeTypeName) {
