@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import javax.jcr.PropertyType;
 
 import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
@@ -117,22 +118,18 @@ public class IndexDefinitionBuilder {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("IndexRule{");
-            sb.append("ruleName='").append(ruleName).append('\'');
-            sb.append(", properties=");
-            if (props.isEmpty()) {
-                sb.append("None");
-            } else {
-                sb.append('[');
-                props.forEach((key, value) -> sb.append(key).append("=").append(value).append(", "));
-                sb.delete(sb.length() - 2, sb.length());  // Remove the trailing comma and space
-                sb.append(']');
-            }
-            sb.append(", indexNodeName=").append(builder.getProperty(LuceneIndexConstants.INDEX_NODE_NAME));
-            sb.append('}');
-            return sb.toString();
+            String propsString = props.isEmpty()
+                ? "None"
+                : props.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue())
+                    .collect(Collectors.joining(", ", "[", "]"));
+
+            return String.format("IndexRule{ruleName='%s', properties=%s, indexNodeName=%s}",
+                ruleName,
+                propsString,
+                builder.getProperty(LuceneIndexConstants.INDEX_NODE_NAME));
         }
+
 
     }
 
