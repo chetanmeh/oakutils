@@ -270,7 +270,7 @@ public class IndexDefinitionBuilder {
         String propName = PathUtils.getName(relativePropName);
         int indexOfColon = propName.indexOf(':');
         if (indexOfColon > 0){
-            propName = propName.substring(indexOfColon + 1) + "-REPLACEME";
+            propName = propName.substring(indexOfColon + 1);
         }
 
         //Just keep ascii chars
