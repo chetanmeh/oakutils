@@ -221,11 +221,11 @@ class IndexConfigGenerator {
      * contain a condition with this String literal. But in most cases, this should correctly detect
      * it.
      *
-     * @param filter the filter
+     * @param query the query statement
      * @return true if the query was originally XPath and false otherwise.
      */
-    public boolean isXPath(Filter filter) {
-        return filter.getQueryStatement().contains("/* xpath");
+    public boolean isOriginallyXPath(String query) {
+        return query.contains("/* xpath");
     }
 
     private void processPropertyRestrictions(Filter filter, IndexRule rule) {
@@ -244,7 +244,7 @@ class IndexConfigGenerator {
 
             if (isFunction(pr.propertyName)) {
 
-                boolean isXPath = isXPath(filter);
+                boolean isXPath = isXPath(filter.getQueryStatement());
                 String queryFunc = PolishToQueryConverter.apply(pr.propertyName, isXPath);
                 String propertyName = FunctionNameConverter.apply(pr.propertyName);
                 PropertyRule prop = rule.property(propertyName);
