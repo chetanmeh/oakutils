@@ -39,7 +39,7 @@ public class FunctionNameConverter {
         String converted = parse(tokens, isXPath);
 
         // lowercase the first letter
-        return converted.substring(0, 1).toLowerCase() + converted.substring(1);
+        return converted.substring(0, 1).toLowerCase(Locale.ENGLISH) + converted.substring(1);
     }
 
     private static String parse(Deque<String> tokens, boolean isXPath) {
