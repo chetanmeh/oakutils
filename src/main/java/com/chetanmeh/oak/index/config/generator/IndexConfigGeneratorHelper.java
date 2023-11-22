@@ -15,9 +15,11 @@ public class IndexConfigGeneratorHelper {
         return result;
     }
 
-    private static void extractQueriesAndGenerateIndex(String queryText, IndexConfigGenerator generator) throws
-            Exception{
-        ContinueLineReader r = new ContinueLineReader(new LineNumberReader(new StringReader(queryText)));
+    private static void extractQueriesAndGenerateIndex(String queryText,
+        IndexConfigGenerator generator) throws
+        Exception {
+        ContinueLineReader r = new ContinueLineReader(
+            new LineNumberReader(new StringReader(queryText)));
         while (true) {
             String line = r.readLine();
             if (line == null) {
@@ -31,12 +33,12 @@ public class IndexConfigGeneratorHelper {
 
             String lowercasedLine = line.toLowerCase();
             if (lowercasedLine.startsWith("select")
-                    || lowercasedLine.startsWith("sql1") || lowercasedLine.startsWith("/")) {
+                || lowercasedLine.startsWith("sql1") || lowercasedLine.startsWith("/")) {
                 String language = "JCR-SQL2";
                 if (lowercasedLine.startsWith("sql1 ")) {
                     language = "sql";
                     line = line.substring("sql1 ".length());
-                } else if (lowercasedLine.startsWith("/")){
+                } else if (lowercasedLine.startsWith("/")) {
                     language = "xpath";
                 }
                 generator.process(line, language);
@@ -45,9 +47,8 @@ public class IndexConfigGeneratorHelper {
     }
 
     /**
-     * Taken from org.apache.jackrabbit.oak.query.AbstractQueryTest
-     * A line reader that supports multi-line statements, where lines that start
-     * with a space belong to the previous line.
+     * Taken from org.apache.jackrabbit.oak.query.AbstractQueryTest A line reader that supports
+     * multi-line statements, where lines that start with a space belong to the previous line.
      */
     private static class ContinueLineReader {
 
@@ -63,7 +64,7 @@ public class IndexConfigGeneratorHelper {
                 return line;
             }
 
-            if (line.startsWith("#")){
+            if (line.startsWith("#")) {
                 return line;
             }
 

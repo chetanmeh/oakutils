@@ -4,12 +4,14 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import javax.jcr.PropertyType;
 
 import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
 import org.apache.jackrabbit.oak.api.Type;
 import org.apache.jackrabbit.oak.commons.PathUtils;
+import org.apache.jackrabbit.oak.plugins.index.IndexConstants;
 import org.apache.jackrabbit.oak.spi.filter.PathFilter;
 import org.apache.jackrabbit.oak.plugins.index.lucene.LuceneIndexConstants;
 import org.apache.jackrabbit.oak.spi.state.NodeBuilder;
@@ -31,6 +33,7 @@ public class IndexDefinitionBuilder {
         builder.setProperty(LuceneIndexConstants.COMPAT_MODE, 2);
         builder.setProperty("async", "async");
         builder.setProperty("type", "lucene");
+        builder.setProperty(LuceneIndexConstants.EVALUATE_PATH_RESTRICTION, true);
         builder.setProperty(JCR_PRIMARYTYPE, "oak:QueryIndexDefinition", Type.NAME);
         indexRule = createChild(builder, LuceneIndexConstants.INDEX_RULES);
     }
@@ -42,6 +45,11 @@ public class IndexDefinitionBuilder {
 
     public IndexDefinitionBuilder includedPaths(String ... paths){
         builder.setProperty(createProperty(PathFilter.PROP_INCLUDED_PATHS, Arrays.asList(paths), Type.STRINGS));
+        return this;
+    }
+
+    public IndexDefinitionBuilder queryPaths(String ... paths){
+        builder.setProperty(createProperty(IndexConstants.QUERY_PATHS, Arrays.asList(paths), Type.STRINGS));
         return this;
     }
 
@@ -107,6 +115,22 @@ public class IndexDefinitionBuilder {
         public String getRuleName() {
             return ruleName;
         }
+
+        @Override
+        public String toString() {
+            String propsString = props.isEmpty()
+                ? "None"
+                : props.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue())
+                    .collect(Collectors.joining(", ", "[", "]"));
+
+            return String.format("IndexRule{ruleName='%s', properties=%s, indexNodeName=%s}",
+                ruleName,
+                propsString,
+                builder.getProperty(LuceneIndexConstants.INDEX_NODE_NAME));
+        }
+
+
     }
 
     public static class PropertyRule {
@@ -159,6 +183,11 @@ public class IndexDefinitionBuilder {
 
         public PropertyRule notNullCheckEnabled(){
             builder.setProperty(LuceneIndexConstants.PROP_NOT_NULL_CHECK_ENABLED, true);
+            return this;
+        }
+
+        public PropertyRule function(String fnName) {
+            builder.setProperty(LuceneIndexConstants.FUNC_NAME, fnName);
             return this;
         }
 
@@ -232,6 +261,8 @@ public class IndexDefinitionBuilder {
         return result;
     }
 
+    // TODO: document examples of this
+    // when the property is like jcr:primaryType or something like this.
     static String getSafePropName(String relativePropName) {
         String propName = PathUtils.getName(relativePropName);
         int indexOfColon = propName.indexOf(':');
