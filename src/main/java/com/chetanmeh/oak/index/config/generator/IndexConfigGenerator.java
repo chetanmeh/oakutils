@@ -65,11 +65,7 @@ class IndexConfigGenerator {
         };
     }
 
-    public static boolean isXPath(String query, String language) {
-        if (language != null) {
-            // the language is case sensitive
-            return "xpath".equals(language);
-        }
+    public static boolean isXPath(String query) {
         // the query is not, at least SQL is not
         query = query.trim().toLowerCase(Locale.ENGLISH);
         // explain queries
@@ -88,7 +84,7 @@ class IndexConfigGenerator {
     }
 
     public void process(String statement) throws ParseException {
-        String lang = isXPath(statement, null) ? "xpath" : "JCR-SQL2";
+        String lang = isXPath(statement) ? "xpath" : "JCR-SQL2";
         process(statement, lang);
     }
 
