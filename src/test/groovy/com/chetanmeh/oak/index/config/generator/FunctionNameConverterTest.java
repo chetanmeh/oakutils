@@ -1,7 +1,6 @@
 package com.chetanmeh.oak.index.config.generator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import java.util.Objects;
 import org.junit.Test;
 
 public class FunctionNameConverterTest {
@@ -52,6 +51,6 @@ public class FunctionNameConverterTest {
 
     private static void checkConvert(String input, String expected, boolean isXPath) {
         String actual = FunctionNameConverter.apply(input, isXPath);
-        assertEquals(expected, actual);
+        assert expected.equals(actual);
     }
 }

@@ -2,6 +2,7 @@ package com.chetanmeh.oak.index.config.generator;
 
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
@@ -9,17 +10,17 @@ import java.util.Map;
 public class FunctionNameConverter {
 
     // Map from function to node name (name of the node in the index definition)
-    private final static Map<String, String> XPATH_NAMES = Map.of(
-        "upper", "upperCase",
-        "lower", "lowerCase",
-        "coalesce", "coalesce",
-        "first", "first",
-        "length", "stringLength",
-        "@:localname", "localname",
-        "@:name", "name",
-        "@:path", "path"
-    );
-
+    private final static Map<String, String> XPATH_NAMES = new HashMap<>();
+    static {
+        XPATH_NAMES.put("upper", "upperCase");
+        XPATH_NAMES.put("lower", "lowerCase");
+        XPATH_NAMES.put("coalesce", "coalesce");
+        XPATH_NAMES.put("first", "first");
+        XPATH_NAMES.put("length", "stringLength");
+        XPATH_NAMES.put("@:localname", "localname");
+        XPATH_NAMES.put("@:name", "name");
+        XPATH_NAMES.put("@:path", "path");
+    }
     /**
      * Converts a given function pattern in polish notation into a string in camelCase. This is used
      * to generate node names from the query. For example, the function pattern
@@ -50,18 +51,25 @@ public class FunctionNameConverter {
         String token = tokens.poll();
         String fn;
 
-        return switch (token) {
-            // All function names are capitalized as we want the node name to be camelCase. The only
-            // exception is the starting function. However, in this function, we "naively"
-            // capitalize all functions and handle that exception in the apply method to avoid
-            // checking if we are dealing with the first function. 
-            case "upper", "lower", "first", "length", "@:localname", "@:name", "@:path" -> {
+        // All function names are capitalized as we want the node name to be camelCase. The only
+        // exception is the starting function. However, in this function, we "naively"
+        // capitalize all functions and handle that exception in the apply method to avoid
+        // checking if we are dealing with the first function.
+        switch (token) {
+            case "upper":
+            case "lower":
+            case "first":
+            case "length":
+            case "@:localname":
+            case "@:name":
+            case "@:path":
                 fn = isXPath ? capitalize(XPATH_NAMES.get(token)) : capitalize(token);
-                yield fn + parse(tokens, isXPath);
-            }
-            case "coalesce" -> capitalize(token) + parse(tokens, isXPath) + parse(tokens, isXPath);
-            default -> capitalize(extractPropertyName(token));
-        };
+                return fn + parse(tokens, isXPath);
+            case "coalesce":
+                return capitalize(token) + parse(tokens, isXPath) + parse(tokens, isXPath);
+            default:
+                return capitalize(extractPropertyName(token));
+        }
     }
 
     /**

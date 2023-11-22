@@ -2,8 +2,6 @@ package com.chetanmeh.oak.index.config.generator;
 
 import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class PolishToQueryConverterTest {
 
     // taken from: https://github.com/apache/jackrabbit-oak/blob/trunk/oak-search/src/test/java/org/apache/jackrabbit/oak/plugins/index/search/util/FunctionIndexProcessorTest.java
@@ -107,10 +105,6 @@ public class PolishToQueryConverterTest {
 
     private static void checkConvert(String input, String expected, boolean isXPath) {
         String res = PolishToQueryConverter.apply(input, isXPath);
-        if (!res.equals(expected)) {
-            System.out.println("Expected: " + expected);
-            System.out.println("Actual:   " + res);
-        }
-//    assertEquals(res, expected);
+        assert res.equals(expected);
     }
 }

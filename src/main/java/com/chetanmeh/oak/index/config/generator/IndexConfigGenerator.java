@@ -1,9 +1,11 @@
 package com.chetanmeh.oak.index.config.generator;
 
+import com.google.appengine.labs.repackaged.com.google.common.collect.ImmutableList;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import com.chetanmeh.oak.index.config.IndexDefinitionBuilder;
@@ -13,12 +15,9 @@ import org.apache.jackrabbit.oak.api.Root;
 import org.apache.jackrabbit.oak.api.Type;
 import org.apache.jackrabbit.oak.commons.PathUtils;
 import org.apache.jackrabbit.oak.core.ImmutableRoot;
-import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeBuilder;
-import org.apache.jackrabbit.oak.plugins.memory.MemoryNodeStore;
 import org.apache.jackrabbit.oak.query.ExecutionContext;
 import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
-import org.apache.jackrabbit.oak.query.QueryFormatter;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfo;
 import org.apache.jackrabbit.oak.query.ast.NodeTypeInfoProvider;
 import org.apache.jackrabbit.oak.spi.query.fulltext.FullTextContains;
@@ -33,9 +32,9 @@ import org.apache.jackrabbit.oak.spi.query.QueryConstants;
 import org.apache.jackrabbit.oak.spi.query.QueryIndex;
 import org.apache.jackrabbit.oak.spi.query.QueryIndex.OrderEntry;
 import org.apache.jackrabbit.oak.spi.query.QueryIndexProvider;
-import org.apache.jackrabbit.oak.spi.state.NodeBuilder;
 import org.apache.jackrabbit.oak.spi.state.NodeState;
-import org.apache.jackrabbit.oak.spi.state.PrefetchNodeStore;
+
+import static org.apache.jackrabbit.oak.InitialContent.INITIAL_CONTENT;
 
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.IndexRule;
 import static com.chetanmeh.oak.index.config.IndexDefinitionBuilder.PropertyRule;
@@ -48,15 +47,15 @@ class IndexConfigGenerator {
     private final Set<String> propsWithFulltextConstraints = new HashSet<>();
 
     public IndexConfigGenerator() {
-        NodeBuilder nb = new MemoryNodeBuilder(new MemoryNodeStore().getRoot());
-        final Root root = new ImmutableRoot(nb.getNodeState());
+//        NodeBuilder nb = new MemoryNodeBuilder(new MemoryNodeStore().getRoot());
+        final Root root = new ImmutableRoot(INITIAL_CONTENT);
         queryEngine = new QueryEngineImpl() {
             @Override
             protected ExecutionContext getExecutionContext() {
-                return new ExecutionContext(nb.getBaseState(),
+                return new ExecutionContext(INITIAL_CONTENT,
                     root,
                     new QueryEngineSettings(),
-                    new LuceneIndexGeneratingIndexProvider(), null, PrefetchNodeStore.NOOP) {
+                    new LuceneIndexGeneratingIndexProvider(), null) {
                     @Override
                     public NodeTypeInfoProvider getNodeTypeInfoProvider() {
                         return DummyNodeTypeInfoProvider.INSTANCE;
@@ -66,8 +65,30 @@ class IndexConfigGenerator {
         };
     }
 
+    public static boolean isXPath(String query, String language) {
+        if (language != null) {
+            // the language is case sensitive
+            return "xpath".equals(language);
+        }
+        // the query is not, at least SQL is not
+        query = query.trim().toLowerCase(Locale.ENGLISH);
+        // explain queries
+        if (query.startsWith("explain")) {
+            query = query.substring("explain".length()).trim();
+            if (query.startsWith("measure")) {
+                query = query.substring("measure".length()).trim();
+            }
+        }
+        // union queries
+        while (query.startsWith("(")) {
+            query = query.substring("(".length()).trim();
+        }
+
+        return !query.startsWith("select");
+    }
+
     public void process(String statement) throws ParseException {
-        String lang = QueryFormatter.isXPath(statement, null) ? "xpath" : "JCR-SQL2";
+        String lang = isXPath(statement, null) ? "xpath" : "JCR-SQL2";
         process(statement, lang);
     }
 
@@ -274,7 +295,7 @@ class IndexConfigGenerator {
 
         @Override
         public List<? extends QueryIndex> getQueryIndexes(NodeState nodeState) {
-            return List.of(new LuceneIndexGeneratingIndex());
+            return ImmutableList.of(new LuceneIndexGeneratingIndex());
         }
     }
 
