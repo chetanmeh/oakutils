@@ -1,6 +1,5 @@
 package com.chetanmeh.oak.index.config.generator;
 
-import java.util.Objects;
 import org.junit.Test;
 
 public class FunctionNameConverterTest {

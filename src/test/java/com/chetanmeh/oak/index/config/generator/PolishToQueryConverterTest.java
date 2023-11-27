@@ -1,5 +1,7 @@
 package com.chetanmeh.oak.index.config.generator;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 public class PolishToQueryConverterTest {
@@ -33,7 +35,7 @@ public class PolishToQueryConverterTest {
             "fn:string-length(fn:path())", true);
         checkConvert(
             "function*length*@:path",
-            "fn:string-length(@jcr:path)", true);
+            "fn:string-length(fn:path())", true);
         checkConvert(
             "function*lower*upper*@test/data",
             "fn:lower-case(fn:upper-case(test/@data))", true);
@@ -81,7 +83,7 @@ public class PolishToQueryConverterTest {
             "length(path())", false);
         checkConvert(
             "function*length*@:path",
-            "length([jcr:path])", false);
+            "length(path())", false);
         checkConvert(
             "function*lower*upper*@test/data",
             "lower(upper([test/data]))", false);
@@ -105,6 +107,6 @@ public class PolishToQueryConverterTest {
 
     private static void checkConvert(String input, String expected, boolean isXPath) {
         String res = PolishToQueryConverter.apply(input, isXPath);
-        assert res.equals(expected);
+        assertEquals(expected, res);
     }
 }

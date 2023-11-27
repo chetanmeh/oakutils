@@ -3,7 +3,6 @@ package com.chetanmeh.oak.index.config.generator;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Set;
 
 public class PolishToQueryConverter {
 
@@ -70,12 +69,15 @@ public class PolishToQueryConverter {
         }
     }
 
-    /*
-       Properties in JCR-SQL2 needs to be surrounded with [ ] and doesn't have "@".
+    /**
+     * Properties in JCR-SQL2 needs to be surrounded with [ ] and doesn't have "@".
+     * Also, ] is escaped as ]].
      */
     private static String formatSQL2Property(String token) {
         if (token.startsWith("@")) {
-            return "[" + token.substring(1) + "]";
+            String property = token.substring(1);
+            property = property.replaceAll("]", "]]");
+            return "[" + property + "]";
         }
         return token;
     }
