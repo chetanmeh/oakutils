@@ -10,4 +10,6 @@ In action: [oakutils.appspot.com](http://oakutils.appspot.com)
 ## Deploy
 
         jdk 11
-        mvn appengine:deploy
+        open https://cloud.google.com/sdk/docs/install-sdk
+        gcloud auth login
+        mvn package appengine:deploy -Dapp.deploy.projectId=oakutils -Dapp.deploy.version=20240703t163000
