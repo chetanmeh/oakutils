@@ -3,7 +3,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <packaging>war</packaging>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.3-SNAPSHOT</version>
   <groupId>com.chetanmeh.appengine</groupId>
   <artifactId>oakutils-war</artifactId>
 
@@ -25,6 +25,11 @@
   </scm>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.jackrabbit</groupId>
+      <artifactId>oak-commons</artifactId>
+      <version>${oak.version}</version>
+    </dependency>  
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>oak-core</artifactId>

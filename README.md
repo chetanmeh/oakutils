@@ -6,3 +6,8 @@ Web app hosting few utilities for [Apache Jackrabbit Oak][1] using Google Appeng
 In action: [oakutils.appspot.com](http://oakutils.appspot.com)
 
 [1]: http://jackrabbit.apache.org/oak
+
+## Deploy
+
+        jdk 11
+        mvn appengine:deploy
