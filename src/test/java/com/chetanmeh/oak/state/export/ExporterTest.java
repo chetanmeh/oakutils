@@ -1,17 +1,9 @@
 package com.chetanmeh.oak.state.export;
 
-import java.lang.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
 import org.apache.jackrabbit.oak.spi.state.NodeState;
 import org.junit.Test;
 
 import com.chetanmeh.oak.index.config.IndexDefinitionBuilder;
-
-import groovy.lang.*;
-import groovy.util.*;
 
 public class ExporterTest {
     @Test

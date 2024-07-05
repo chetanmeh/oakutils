@@ -15,6 +15,7 @@ import org.apache.jackrabbit.oak.api.Root;
 import org.apache.jackrabbit.oak.api.Type;
 import org.apache.jackrabbit.oak.commons.PathUtils;
 import org.apache.jackrabbit.oak.core.ImmutableRoot;
+import org.apache.jackrabbit.oak.plugins.index.IndexConstants;
 import org.apache.jackrabbit.oak.query.ExecutionContext;
 import org.apache.jackrabbit.oak.query.QueryEngineImpl;
 import org.apache.jackrabbit.oak.query.QueryEngineSettings;
@@ -98,11 +99,21 @@ class IndexConfigGenerator {
 
     private void processFilter(Filter filter, List<OrderEntry> sortOrder) {
         addPathRestrictions(filter);
+        addIndexTag(filter);
         IndexRule rule = processNodeTypeConstraint(filter);
         processFulltextConstraints(filter, rule);
         processPropertyRestrictions(filter, rule);
         processSortConditions(sortOrder, rule);
         processPureNodeTypeConstraints(filter, rule);
+    }
+    
+    private void addIndexTag(Filter filter) {
+        PropertyRestriction indexTag = filter.getPropertyRestriction(IndexConstants.INDEX_TAG_OPTION);
+        if (indexTag != null && indexTag.first != null) {
+            // index tag specified
+            String tag = indexTag.first.getValue(Type.STRING);
+            builder.indexTag(tag);
+        }
     }
 
     private void addPathRestrictions(Filter filter) {

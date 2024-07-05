@@ -9,7 +9,12 @@ In action: [oakutils.appspot.com](http://oakutils.appspot.com)
 
 ## Deploy
 
-        jdk 11
-        open https://cloud.google.com/sdk/docs/install-sdk
-        gcloud auth login
-        mvn package appengine:deploy -Dapp.deploy.projectId=oakutils -Dapp.deploy.version=20240703t163000
+    jdk 11
+    open https://cloud.google.com/sdk/docs/install-sdk
+    gcloud auth login
+    mvn package appengine:deploy -Dapp.deploy.projectId=oakutils -Dapp.deploy.version=20240703t163000
+
+## Local Development
+
+    Consider adding sufficient unit tests, and using
+    http://gaelyk.appspot.com/tutorial/run-deploy#run
