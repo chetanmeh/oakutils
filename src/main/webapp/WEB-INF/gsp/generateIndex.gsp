@@ -1,24 +1,17 @@
 <%
     def QUERY_DEFAULT = '''
-#Paste your queries here
-
-SELECT
-  *
+# Paste your queries here:
+SELECT *
 FROM [dam:Asset] AS a
-WHERE
-  a.[jcr:content/metadata/status] = 'published'
-ORDER BY
-  a.[jcr:content/metadata/jcr:lastModified] DESC
+WHERE a.[jcr:content/metadata/status] = 'published'
+ORDER BY a.[jcr:content/metadata/jcr:lastModified] DESC
 
-# There can be multiple queries added here and index generated would cover all
-# of them
-SELECT
-  *
+# Multiple queries are supported
+SELECT *
 FROM [dam:Asset]
-WHERE
-  CONTAINS([mimetype], 'text/plain')
+WHERE CONTAINS([mimetype], 'text/plain')
 
-# You can also include xpath queries
+# XPath queries are also supported
 /jcr:root/content/dam/element(*, dam:Asset)[@valid]
     '''
 
@@ -62,7 +55,13 @@ WHERE
             </div>
             <input type="submit" value="Generate">
         </form>
+        <br>
+        <br>
+        <a href="https://experienceleague.adobe.com/docs/experience-manager-65/assets/JCR_query_cheatsheet-v1.1.pdf">Query Cheat Sheet</a> 
+        <br>
         <a href="/">Back</a>
+        <br>
+        <br>
     </div>
 
     <% if (error == null){%>
