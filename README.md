@@ -1,6 +1,8 @@
 Oak Utility App
 ===============
 
+**Notice: This project is no longer maintained. Use [Oak Tools](https://thomasmueller.github.io/oakTools/) instead.**
+
 Web app hosting few utilities for [Apache Jackrabbit Oak][1] using Google Appengine.
 
 In action: [oakutils.appspot.com](http://oakutils.appspot.com)
@@ -12,7 +14,7 @@ In action: [oakutils.appspot.com](http://oakutils.appspot.com)
     jdk 11
     open https://cloud.google.com/sdk/docs/install-sdk
     gcloud auth login
-    mvn package appengine:deploy -Dapp.deploy.projectId=oakutils -Dapp.deploy.version=20240703t163000
+    mvn package appengine:deploy -Dapp.deploy.projectId=oakutils -Dapp.deploy.version=20240709t113000
 
 ## Local Development
 

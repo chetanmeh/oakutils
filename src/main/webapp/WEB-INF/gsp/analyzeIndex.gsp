@@ -17,6 +17,10 @@
 <div class="container">
     <div class="row">
         <h1 class="display-1 text-center">Index Definition Analyzer</h1>
+        <p>
+            Notice: This project is no longer maintained.
+            Use <a href="https://thomasmueller.github.io/oakTools/">Oak Tools</a> instead.
+        </p>
         <% if (indexes) {%>
         <h3>Index Details</h3>
         <ul>
