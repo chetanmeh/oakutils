@@ -36,6 +36,10 @@
 <body>
   <article class="markdown-body">
     <h1>Revision Formatter</h1>
+    <p>
+        Notice: This project is no longer maintained.
+        Use <a href="https://thomasmueller.github.io/oakTools/">Oak Tools</a> instead.
+    </p>
     <p class="center">Extracts the revision string from any text and converts them to
       formatted date.</p>
 
