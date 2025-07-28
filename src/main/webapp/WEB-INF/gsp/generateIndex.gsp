@@ -1,24 +1,17 @@
 <%
     def QUERY_DEFAULT = '''
-#Paste your queries here
-
-SELECT
-  *
+# Paste your queries here:
+SELECT *
 FROM [dam:Asset] AS a
-WHERE
-  a.[jcr:content/metadata/status] = 'published'
-ORDER BY
-  a.[jcr:content/metadata/jcr:lastModified] DESC
+WHERE a.[jcr:content/metadata/status] = 'published'
+ORDER BY a.[jcr:content/metadata/jcr:lastModified] DESC
 
-# There can be multiple queries added here and index generated would cover all
-# of them
-SELECT
-  *
+# Multiple queries are supported
+SELECT *
 FROM [dam:Asset]
-WHERE
-  CONTAINS([mimetype], 'text/plain')
+WHERE CONTAINS([mimetype], 'text/plain')
 
-# You can also include xpath queries
+# XPath queries are also supported
 /jcr:root/content/dam/element(*, dam:Asset)[@valid]
     '''
 
@@ -54,6 +47,10 @@ WHERE
 <div class="container">
     <div class="row">
         <h1 class="display-1 text-center">Oak Index Definition Generator</h1>
+        <p>
+            Notice: This project is no longer maintained.
+            Use <a href="https://thomasmueller.github.io/oakTools/">Oak Tools</a> instead.
+        </p>
         <p class="lead">Generates an index definition for a given set of queries</p>
         <form method="POST">
             <div class="form-group">
@@ -62,7 +59,13 @@ WHERE
             </div>
             <input type="submit" value="Generate">
         </form>
+        <br>
+        <br>
+        <a href="https://experienceleague.adobe.com/docs/experience-manager-65/assets/JCR_query_cheatsheet-v1.1.pdf">Query Cheat Sheet</a> 
+        <br>
         <a href="/">Back</a>
+        <br>
+        <br>
     </div>
 
     <% if (error == null){%>

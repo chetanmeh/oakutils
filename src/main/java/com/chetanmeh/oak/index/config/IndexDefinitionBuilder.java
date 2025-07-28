@@ -23,6 +23,11 @@ import static org.apache.jackrabbit.oak.plugins.memory.EmptyNodeState.EMPTY_NODE
 import static org.apache.jackrabbit.oak.plugins.memory.PropertyStates.createProperty;
 
 public class IndexDefinitionBuilder {
+    
+    private static final String WARN_MISSING_PATH_RESTRICTION = "warningPathRestrictionMissing";
+    private static final String WARN_MISSING_INDEX_TAG = "warningTagMissing";
+    private static final String WARN_COMMON_NODE_TYPE = "warningCommonNodeType";
+    
     private final NodeBuilder builder = EMPTY_NODE.builder();
     private final Map<String, IndexRule> rules = Maps.newHashMap();
     private final Map<String, AggregateRule> aggRules = Maps.newHashMap();
@@ -33,6 +38,9 @@ public class IndexDefinitionBuilder {
         builder.setProperty(LuceneIndexConstants.COMPAT_MODE, 2);
         builder.setProperty("async", "async");
         builder.setProperty("type", "lucene");
+        builder.setProperty(WARN_MISSING_PATH_RESTRICTION, "Consider adding a path restriction to the query. The query currently does not have a path restriction, that means the index will need to cover all nodes, including for example the version store. This will slow down index generation, and can increase the index size.");
+        builder.setProperty(WARN_MISSING_INDEX_TAG, "Consider adding a tag to the query, via 'option(index tag abc)'. See also https://jackrabbit.apache.org/oak/docs/query/query-engine.html#query-option-index-tag . The query currently does not have a tag, which can result in the wrong index to be used. Also, it prevents to add 'selectionPolicy' = 'tag' to the index definition, meaning that other, unrelated queries might use this index by mistake.");
+        builder.setProperty(WARN_COMMON_NODE_TYPE, "Consider adding a more restrictive node type condition. Indexes on 'nt:base' or 'nt:unstructured' cover a lot of nodes, which increases the index size, and slows down query execution. Use a primary or mixin node type if possible.");
         builder.setProperty(LuceneIndexConstants.EVALUATE_PATH_RESTRICTION, true);
         builder.setProperty(JCR_PRIMARYTYPE, "oak:QueryIndexDefinition", Type.NAME);
         indexRule = createChild(builder, LuceneIndexConstants.INDEX_RULES);
@@ -45,11 +53,20 @@ public class IndexDefinitionBuilder {
 
     public IndexDefinitionBuilder includedPaths(String ... paths){
         builder.setProperty(createProperty(PathFilter.PROP_INCLUDED_PATHS, Arrays.asList(paths), Type.STRINGS));
+        builder.removeProperty(WARN_MISSING_PATH_RESTRICTION);
         return this;
     }
 
     public IndexDefinitionBuilder queryPaths(String ... paths){
         builder.setProperty(createProperty(IndexConstants.QUERY_PATHS, Arrays.asList(paths), Type.STRINGS));
+        builder.removeProperty(WARN_MISSING_PATH_RESTRICTION);
+        return this;
+    }
+    
+    public IndexDefinitionBuilder indexTag(String tag) {
+        builder.setProperty(createProperty(IndexConstants.INDEX_TAGS, Arrays.asList(tag), Type.STRINGS));
+        builder.setProperty("selectionPolicy", "tag");
+        builder.removeProperty(WARN_MISSING_INDEX_TAG);
         return this;
     }
 
@@ -64,7 +81,10 @@ public class IndexDefinitionBuilder {
 
     //~--------------------------------------< IndexRule >
 
-    public IndexRule indexRule(String type){
+    public IndexRule indexRule(String type) {
+        if (!"nt:unstructured".equals(type) && !"nt:base".equals(type)) {
+            builder.removeProperty(WARN_COMMON_NODE_TYPE);
+        }
         IndexRule rule = rules.get(type);
         if (rule == null){
             rule = new IndexRule(createChild(indexRule, type), type);
@@ -274,4 +294,5 @@ public class IndexDefinitionBuilder {
         propName = propName.replaceAll("\\W", "");
         return propName;
     }
+
 }
